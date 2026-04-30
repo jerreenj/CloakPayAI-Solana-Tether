@@ -35,6 +35,9 @@ Amount: pending
 Memo: urgent wallet verification
 Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase.`;
 
+const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
+const faucetUrl = "https://faucet.solana.com/";
+
 function bytesFromBase64(value: string) {
   const binary = window.atob(value);
   return Uint8Array.from(binary, (char) => char.charCodeAt(0));
@@ -135,6 +138,27 @@ export default function App() {
     setTxSignature("");
     setInvoiceText(nextText);
     setMessage("Sample loaded. Run analysis to score it locally.");
+  }
+
+  async function tryWithoutWallet() {
+    setBusy(true);
+    setFile(null);
+    setImagePreview("");
+    setPrepared(null);
+    setTxSignature("");
+    setInvoiceText(safeInvoice);
+    const data = analyzeLocally({ text: safeInvoice, fileName: "safe-public-preview.txt", browserFallback: true });
+    setAnalysis(data);
+    setIntent(data.intent);
+    setReceipt(
+      await createLocalReceipt({
+        intent: data.intent,
+        riskReport: data.riskReport,
+        invoiceText: safeInvoice
+      })
+    );
+    setMessage("Walletless preview complete: analysis and receipt were created locally.");
+    setBusy(false);
   }
 
   async function analyzePayment(useSampleText = false) {
@@ -329,6 +353,33 @@ export default function App() {
           ))}
         </section>
 
+        <section className="user-guide" aria-label="First time guide">
+          <div>
+            <small>Start here</small>
+            <strong>Try the firewall before connecting a wallet.</strong>
+            <p>Run a safe or risky sample to see how CloakPay catches payment risk before signing.</p>
+            <button type="button" disabled={busy} onClick={tryWithoutWallet}>
+              Try Without Wallet
+            </button>
+          </div>
+          <div>
+            <small>Wallet testers</small>
+            <strong>Use devnet only.</strong>
+            <p>No mainnet, no real funds, no paid RPC. Get faucet SOL, connect wallet, then sign a devnet transfer.</p>
+            <a href={faucetUrl} target="_blank" rel="noreferrer">
+              Get Devnet SOL
+            </a>
+          </div>
+          <div>
+            <small>Feedback</small>
+            <strong>Help shape the real product.</strong>
+            <p>Send bugs, confusing screens, wallet issues, or invoice cases we should support next.</p>
+            <a href={feedbackUrl} target="_blank" rel="noreferrer">
+              Leave Feedback
+            </a>
+          </div>
+        </section>
+
         <div className="console-grid">
           <section className="panel input-panel">
             <div className="panel-header">
@@ -464,6 +515,9 @@ export default function App() {
               <span>5</span>
               <h2>Sign On Devnet</h2>
             </div>
+            <div className="safety-banner">
+              Devnet preview only. Mainnet payments are disabled until audits, production monitoring, and user safeguards are ready.
+            </div>
             <div className="receipt-block">
               <small>Wallet</small>
               <strong>{formatAddress(walletAddress)}</strong>
@@ -520,6 +574,11 @@ export default function App() {
             ) : (
               <p className="muted">Receipt will prove what was checked without exposing private invoice text.</p>
             )}
+            <div className="feedback-footer">
+              <a href={feedbackUrl} target="_blank" rel="noreferrer">
+                Report issue or request feature
+              </a>
+            </div>
           </section>
         </div>
       </section>

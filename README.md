@@ -9,12 +9,12 @@ The build path is intentionally $0: no paid APIs, paid hosting, paid RPC, paid d
 ## Winning Demo
 
 1. Open the local app.
-2. Run the safe sample, then the risky sample, or upload a payment screenshot.
-3. Show QVAC/local analysis extracting merchant, recipient, amount, token, and memo.
-4. Show the payment firewall verdict: safe, review, or block.
-5. Connect a Solana wallet on devnet.
-6. Prepare, sign, and send devnet SOL.
-7. Show the explorer link and local privacy receipt.
+2. Click **Try Without Wallet** for the fastest public preview.
+3. Run the safe sample, then the risky sample, or upload a payment screenshot.
+4. Show QVAC/local analysis extracting merchant, recipient, amount, token, and memo.
+5. Show the payment firewall verdict: safe, review, or block.
+6. Wallet testers can get devnet SOL, connect a wallet, prepare/sign/send devnet SOL, and show the explorer link.
+7. Show the local privacy receipt and feedback CTA.
 
 The story: private invoice data is analyzed locally before signing; Solana only receives the confirmed payment.
 
@@ -26,6 +26,15 @@ The story: private invoice data is analyzed locally before signing; Solana only 
 - No paid database: use browser state and local runtime only.
 - No paid assets: use CSS and generated sample invoices.
 - No mainnet funds: use devnet SOL from faucet only.
+- Mainnet payments are intentionally disabled for public preview until audits, monitoring, support, and user safeguards are ready.
+
+## Public Preview Rollout
+
+1. Send the Vercel link to 20 users first.
+2. Ask most users to click **Try Without Wallet**.
+3. Ask wallet testers to use devnet SOL only.
+4. Collect feedback through the GitHub issue link inside the app.
+5. Fix confusing screens or failed wallet paths before sharing with 200 users.
 
 ## Tech Stack
 

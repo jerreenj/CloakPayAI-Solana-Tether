@@ -174,6 +174,33 @@ small {
   padding: 10px;
 }
 
+.user-guide {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.user-guide div {
+  background: #ffffff;
+  border: 1px solid #dce2da;
+  border-radius: 8px;
+  box-shadow: 0 14px 35px rgba(18, 30, 23, 0.06);
+  display: grid;
+  gap: 9px;
+  padding: 16px;
+}
+
+.user-guide p {
+  color: #5d6b63;
+  line-height: 1.42;
+}
+
+.user-guide button,
+.user-guide a {
+  margin-top: 4px;
+}
+
 .flow-rail div {
   align-items: center;
   border-radius: 8px;
@@ -351,6 +378,16 @@ textarea {
   color: #63470c;
 }
 
+.safety-banner {
+  background: #fff5df;
+  border: 1px solid #ecd39a;
+  border-radius: 8px;
+  color: #63470c;
+  font-weight: 750;
+  line-height: 1.4;
+  padding: 11px 12px;
+}
+
 .risk-panel.safe .risk-score {
   background: #dbf8e8;
   border-color: #8ccaa8;
@@ -404,9 +441,21 @@ code {
   line-height: 1.4;
 }
 
+.feedback-footer {
+  margin-top: auto;
+}
+
+.feedback-footer a {
+  width: 100%;
+}
+
 @media (max-width: 1120px) {
   .topbar,
   .console-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .user-guide {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -423,6 +472,7 @@ code {
   .topbar,
   .stack-strip,
   .flow-rail,
+  .user-guide,
   .console-grid {
     grid-template-columns: 1fr;
   }

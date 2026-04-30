@@ -7,12 +7,13 @@ CloakPay AI is a local-first QVAC payment firewall for Solana payments. It check
 ## Walkthrough
 
 1. Open the app and point out the $0 build path: local QVAC/fallback analysis, public Solana devnet RPC, browser/local storage, and no paid services.
-2. Run the safe sample invoice and show the extracted merchant, recipient, amount, token, and memo.
-3. Show the safe/review/block risk verdict and the evidence behind it.
-4. Run the risky sample and show how missing fields, urgency, unknown token, or wallet-verification language changes the verdict.
-5. Return to the safe sample, connect a Solana wallet on devnet, prepare the transaction, and sign/send with faucet SOL.
-6. Open the devnet explorer link.
-7. Create the privacy receipt and show the invoice hash, commitment, nullifier preview, redacted summary, and transaction signature.
+2. Click **Try Without Wallet** to show that first-time users can test without setup.
+3. Run the safe sample invoice and show the extracted merchant, recipient, amount, token, and memo.
+4. Show the safe/review/block risk verdict and the evidence behind it.
+5. Run the risky sample and show how missing fields, urgency, unknown token, or wallet-verification language changes the verdict.
+6. For wallet testers, open the devnet SOL faucet, connect a wallet on devnet, prepare the transaction, and sign/send with faucet SOL.
+7. Open the devnet explorer link.
+8. Create the privacy receipt and show the invoice hash, commitment, nullifier preview, redacted summary, and transaction signature.
 
 ## Closing
 
@@ -31,3 +32,7 @@ The public Vercel page is the preview. The live QVAC OCR story is strongest in t
 - No paid hosting required.
 - No paid assets.
 - No mainnet funds.
+
+## Mainnet Positioning
+
+Mainnet is the production direction, but it is not enabled in this public preview. Real-money payments need audits, monitoring, fraud handling, support, and safer UX before users can trust it.
