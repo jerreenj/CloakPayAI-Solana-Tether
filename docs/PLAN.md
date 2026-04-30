@@ -2,12 +2,12 @@
 
 ## Product
 
-CloakPay AI is a local-first QVAC payment firewall for anyone sending crypto payments. The MVP focuses on Solana devnet: it analyzes invoice/payment data locally, flags risk before signing, sends a real devnet transaction, and produces a privacy receipt.
+CloakPay AI, a local-first QVAC payment firewall for Solana payments. The MVP focuses on Solana devnet: it analyzes invoice/payment data locally, flags risk before signing, sends a real devnet transaction, and produces a privacy receipt.
 
 ## Core Loop
 
 1. User runs the local web app.
-2. User loads the free sample invoice or uploads an invoice image.
+2. User loads the safe sample, risky sample, or uploads an invoice image.
 3. QVAC OCR extracts text when live mode is enabled; fallback mode keeps demos reliable.
 4. Local risk engine scores the payment and explains the verdict.
 5. User reviews merchant, recipient, amount, token, and memo.
@@ -18,7 +18,7 @@ CloakPay AI is a local-first QVAC payment firewall for anyone sending crypto pay
 
 ## $0 Build Constraint
 
-- The product idea is CloakPay AI, not a "zero-dollar app"; $0 is the operating constraint for building and demoing it.
+- The product idea is CloakPay AI; $0 is the operating constraint for building and demoing it.
 - No paid AI, OCR, RPC, hosting, database, or assets.
 - No mainnet funds or mainnet transactions.
 - Use public devnet RPC and faucet SOL only.

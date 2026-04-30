@@ -117,6 +117,7 @@ function buildRiskReport(intent: PaymentIntent, blocks: OCRBlock[]): RiskReport 
 
   if (intent.token === "UNKNOWN") {
     score += 12;
+    warnings.push("Payment token is unknown; verify token before signing.");
     evidence.push("Token symbol missing; app will use SOL for the devnet demo only.");
   }
 
@@ -126,10 +127,16 @@ function buildRiskReport(intent: PaymentIntent, blocks: OCRBlock[]): RiskReport 
     evidence.push(`Amount parsed as ${intent.amount} ${intent.token === "UNKNOWN" ? "SOL" : intent.token}.`);
   }
 
-  if (/(urgent|immediately|avoid fee|seed phrase|private key|verify wallet|airdrop claim|bonus expires)/i.test(text)) {
+  if (/(urgent|immediately|avoid fee|seed phrase|private key|verify wallet|wallet verification|airdrop claim|bonus expires|claim now)/i.test(text)) {
     score += 32;
     warnings.push("Suspicious payment language found.");
     evidence.push("Invoice text contains urgency, wallet-verification, or credential-risk wording.");
+  }
+
+  if (/unknown merchant|merchant:\s*unknown|unknown airdrop/i.test(text) || intent.merchant.toLowerCase().includes("unknown")) {
+    score += 10;
+    warnings.push("Merchant identity looks weak or unknown.");
+    evidence.push("Merchant field does not identify a trusted counterparty.");
   }
 
   if (/(usdt|tether)/i.test(text) && intent.token === "SOL") {

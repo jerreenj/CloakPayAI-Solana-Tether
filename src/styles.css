@@ -184,10 +184,16 @@ h2 {
 }
 
 .button-row,
+.sample-row,
 .metric-row {
   display: grid;
   gap: 10px;
   grid-template-columns: 1fr 1fr;
+}
+
+.sample-row button {
+  background: #27614a;
+  padding: 0.7rem 0.85rem;
 }
 
 small {

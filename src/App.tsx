@@ -19,12 +19,20 @@ declare global {
 const devnetEndpoint = "https://api.devnet.solana.com";
 const connection = new Connection(devnetEndpoint, "confirmed");
 
-const sampleInvoice = `Merchant: Frontier Labs
+const productDescription = "a local-first QVAC payment firewall for Solana payments.";
+
+const safeInvoice = `Merchant: Frontier Labs
 Invoice: CLPAY-042
 Amount: 0.25 SOL
 Recipient: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
 Memo: QVAC local payment firewall demo
 Note: Pay after local verification only`;
+
+const suspiciousInvoice = `Merchant: Unknown Airdrop Desk
+Invoice: CLAIM-NOW
+Amount: pending
+Memo: urgent wallet verification
+Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase.`;
 
 function bytesFromBase64(value: string) {
   const binary = window.atob(value);
@@ -60,9 +68,9 @@ export default function App() {
   const [walletAddress, setWalletAddress] = useState("");
   const [txSignature, setTxSignature] = useState("");
   const [qvacStatus, setQvacStatus] = useState<QvacStatus | null>(null);
-  const [invoiceText, setInvoiceText] = useState(sampleInvoice);
+  const [invoiceText, setInvoiceText] = useState(safeInvoice);
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("Ready for zero-dollar local analysis.");
+  const [message, setMessage] = useState("Ready for local payment analysis.");
 
   useEffect(() => {
     fetch("/api/qvac/status")
@@ -79,7 +87,7 @@ export default function App() {
       ["AI", qvacStatus?.mode === "live-qvac" ? "Live local QVAC" : "Free fallback demo"],
       ["RPC", "Public Solana devnet"],
       ["Storage", "Browser/local only"],
-      ["Spend", "$0"]
+      ["Build Cost", "$0"]
     ],
     [qvacStatus]
   );
@@ -93,6 +101,18 @@ export default function App() {
     setTxSignature("");
     setMessage("");
     setImagePreview(nextFile ? await fileToDataUrl(nextFile) : "");
+  }
+
+  function loadSample(nextText: string) {
+    setFile(null);
+    setImagePreview("");
+    setAnalysis(null);
+    setIntent(null);
+    setReceipt(null);
+    setPrepared(null);
+    setTxSignature("");
+    setInvoiceText(nextText);
+    setMessage("Sample loaded. Run analysis to score it locally.");
   }
 
   async function analyzePayment(useSampleText = false) {
@@ -214,9 +234,9 @@ export default function App() {
       <section className="workspace">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Zero-Dollar QVAC Payment Firewall</p>
+            <p className="eyebrow">QVAC Payment Firewall</p>
             <h1>CloakPay AI</h1>
-            <p className="subtitle">Local AI checks the payment before Solana sees it.</p>
+            <p className="subtitle">{productDescription}</p>
           </div>
           <div className="status-pill">{message}</div>
         </header>
@@ -244,6 +264,14 @@ export default function App() {
               />
               {imagePreview ? <img src={imagePreview} alt="Payment upload preview" /> : <strong>Upload invoice image</strong>}
             </label>
+            <div className="sample-row">
+              <button type="button" disabled={busy} onClick={() => loadSample(safeInvoice)}>
+                Safe Sample
+              </button>
+              <button type="button" disabled={busy} onClick={() => loadSample(suspiciousInvoice)}>
+                Risky Sample
+              </button>
+            </div>
             <textarea value={invoiceText} onChange={(event) => setInvoiceText(event.target.value)} />
             <div className="button-row">
               <button disabled={busy} onClick={() => analyzePayment(true)}>

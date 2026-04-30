@@ -1,6 +1,6 @@
 # CloakPay AI
 
-Local-first QVAC payment firewall for the Tether Frontier track.
+CloakPay AI, a local-first QVAC payment firewall for Solana payments.
 
 CloakPay AI checks a Solana payment before the user signs it. It analyzes an invoice or payment screenshot locally with QVAC OCR, converts the extracted text into a payment intent, scores the risk, prepares a real Solana devnet transfer, and generates a privacy-safe receipt.
 
@@ -9,7 +9,7 @@ The build path is intentionally $0: no paid APIs, paid hosting, paid RPC, paid d
 ## Winning Demo
 
 1. Open the local app.
-2. Run the built-in sample invoice or upload a payment screenshot.
+2. Run the safe sample, then the risky sample, or upload a payment screenshot.
 3. Show QVAC/local analysis extracting merchant, recipient, amount, token, and memo.
 4. Show the payment firewall verdict: safe, review, or block.
 5. Connect a Solana wallet on devnet.

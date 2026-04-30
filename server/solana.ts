@@ -18,7 +18,7 @@ function toPublicKey(value: string, fallback: string) {
 
 export async function prepareDevnetTransfer({ intent, payer }: PrepareRequest) {
   if (intent.token === "USDT") {
-    throw new Error("USDT is tracked in the payment intent, but the zero-dollar MVP only sends devnet SOL.");
+    throw new Error("USDT is tracked in the payment intent, but the $0 MVP only sends devnet SOL.");
   }
 
   const fallbackKey = "11111111111111111111111111111111";
