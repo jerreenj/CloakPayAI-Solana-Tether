@@ -1,8 +1,10 @@
 # CloakPay AI
 
-Zero-dollar, local-first payment firewall for the Tether QVAC Frontier track.
+Local-first QVAC payment firewall for the Tether Frontier track.
 
-CloakPay AI checks a Solana payment before the user signs it. It analyzes an invoice or payment screenshot locally with QVAC OCR, converts the extracted text into a payment intent, scores the risk, prepares a real Solana devnet transfer, and generates a privacy-safe receipt without using paid APIs, paid hosting, paid RPC, paid databases, or mainnet funds.
+CloakPay AI checks a Solana payment before the user signs it. It analyzes an invoice or payment screenshot locally with QVAC OCR, converts the extracted text into a payment intent, scores the risk, prepares a real Solana devnet transfer, and generates a privacy-safe receipt.
+
+The build path is intentionally $0: no paid APIs, paid hosting, paid RPC, paid databases, paid assets, or mainnet funds.
 
 ## Winning Demo
 
@@ -16,14 +18,14 @@ CloakPay AI checks a Solana payment before the user signs it. It analyzes an inv
 
 The story: private invoice data is analyzed locally before signing; Solana only receives the confirmed payment.
 
-## Zero-Dollar Rules
+## $0 Build Rules
 
-- No paid AI: QVAC SDK locally only.
-- No paid OCR: QVAC OCR or local deterministic fallback.
-- No paid RPC: public Solana devnet RPC only.
-- No paid database: browser state and local runtime only.
-- No paid assets: CSS and generated sample invoice only.
-- No mainnet funds: devnet SOL from faucet only.
+- No paid AI: use QVAC SDK locally.
+- No paid OCR: use QVAC OCR or local deterministic fallback.
+- No paid RPC: use public Solana devnet RPC.
+- No paid database: use browser state and local runtime only.
+- No paid assets: use CSS and generated sample invoices.
+- No mainnet funds: use devnet SOL from faucet only.
 
 ## Tech Stack
 

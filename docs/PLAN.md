@@ -1,8 +1,8 @@
-# CloakPay AI Zero-Dollar Build Plan
+# CloakPay AI Hackathon Build Plan
 
 ## Product
 
-CloakPay AI is a local-first payment firewall for anyone sending crypto payments. The MVP focuses on Solana devnet: it analyzes invoice/payment data locally, flags risk before signing, sends a real devnet transaction, and produces a privacy receipt.
+CloakPay AI is a local-first QVAC payment firewall for anyone sending crypto payments. The MVP focuses on Solana devnet: it analyzes invoice/payment data locally, flags risk before signing, sends a real devnet transaction, and produces a privacy receipt.
 
 ## Core Loop
 
@@ -16,10 +16,11 @@ CloakPay AI is a local-first payment firewall for anyone sending crypto payments
 8. Wallet signs and sends the transaction.
 9. App creates a local receipt with invoice hash, commitment, nullifier preview, and tx signature.
 
-## Zero-Dollar Constraints
+## $0 Build Constraint
 
+- The product idea is CloakPay AI, not a "zero-dollar app"; $0 is the operating constraint for building and demoing it.
 - No paid AI, OCR, RPC, hosting, database, or assets.
-- No mainnet funds.
+- No mainnet funds or mainnet transactions.
 - Use public devnet RPC and faucet SOL only.
 - Optional hosting must be free tier.
 

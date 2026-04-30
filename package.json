@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "Zero-dollar QVAC-powered local payment firewall for Solana devnet payments.",
+  "description": "Local-first QVAC payment firewall for Solana devnet payments.",
   "scripts": {
     "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
     "dev:web": "vite --host 127.0.0.1 --port 5173",
