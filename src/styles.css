@@ -1,6 +1,6 @@
 :root {
   color: #17201b;
-  background: #eef1ec;
+  background: #f3f5f2;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -20,49 +20,76 @@ textarea {
 }
 
 button {
+  align-items: center;
   border: 0;
   border-radius: 8px;
   background: #111815;
   color: #ffffff;
   cursor: pointer;
-  font-weight: 800;
-  padding: 0.85rem 1rem;
+  display: inline-flex;
+  font-weight: 850;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.78rem 1rem;
 }
 
 button:disabled {
-  background: #9ba39b;
+  background: #a3aaa5;
   cursor: not-allowed;
 }
 
 a {
+  align-items: center;
+  background: #e7f7ef;
+  border: 1px solid #b9dec9;
+  border-radius: 8px;
   color: #0d6b48;
-  font-weight: 800;
+  display: inline-flex;
+  font-weight: 850;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
 }
 
 .app-shell {
+  background:
+    linear-gradient(135deg, rgba(24, 165, 107, 0.12), transparent 32%),
+    linear-gradient(315deg, rgba(32, 41, 37, 0.08), transparent 30%),
+    #f3f5f2;
   min-height: 100vh;
-  padding: 24px;
+  padding: 28px;
 }
 
 .workspace {
   margin: 0 auto;
-  max-width: 1320px;
+  max-width: 1380px;
 }
 
 .topbar {
-  align-items: end;
-  display: flex;
-  gap: 20px;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  align-items: stretch;
+  background: #111815;
+  border: 1px solid #1f2a25;
+  border-radius: 8px;
+  color: #ffffff;
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  margin-bottom: 14px;
+  overflow: hidden;
+  padding: 28px;
+}
+
+.hero-copy {
+  display: grid;
+  gap: 10px;
 }
 
 .eyebrow {
-  color: #52655c;
-  font-size: 0.78rem;
+  color: #7cf0af;
+  font-size: 0.76rem;
   font-weight: 900;
-  letter-spacing: 0;
-  margin: 0 0 6px;
+  letter-spacing: 0.06em;
+  margin: 0;
   text-transform: uppercase;
 }
 
@@ -73,45 +100,62 @@ p {
 }
 
 h1 {
-  font-size: clamp(2.4rem, 5vw, 5.6rem);
-  line-height: 0.92;
+  font-size: clamp(2.7rem, 6vw, 6.4rem);
+  line-height: 0.9;
 }
 
 h2 {
-  font-size: 1rem;
+  font-size: 0.96rem;
 }
 
 .subtitle {
-  color: #52655c;
-  font-size: 1.05rem;
-  margin-top: 8px;
+  color: #dbeee2;
+  font-size: clamp(1.05rem, 2vw, 1.32rem);
+  max-width: 760px;
+}
+
+.hero-note {
+  color: #a8b9b0;
+  max-width: 720px;
 }
 
 .status-pill {
-  background: #dbeee2;
-  border: 1px solid #bfd4c6;
+  align-self: end;
+  background: #ffffff;
   border-radius: 8px;
-  color: #21382b;
+  color: #17201b;
+  display: grid;
+  gap: 6px;
   line-height: 1.35;
-  max-width: 420px;
-  padding: 0.8rem 1rem;
+  padding: 16px;
+}
+
+.status-pill small,
+small {
+  color: #637169;
+  display: block;
+  font-size: 0.73rem;
+  font-weight: 850;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.status-pill strong {
+  overflow-wrap: anywhere;
 }
 
 .stack-strip {
   display: grid;
   gap: 10px;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-bottom: 14px;
+  margin-bottom: 10px;
 }
 
-.stack-strip div,
-.metric-row div,
-.receipt-block,
-.risk-score {
-  background: #ffffff;
+.stack-strip div {
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid #dce2da;
   border-radius: 8px;
-  padding: 12px;
+  padding: 13px 14px;
 }
 
 .stack-strip strong {
@@ -119,20 +163,62 @@ h2 {
   overflow-wrap: anywhere;
 }
 
-.console-grid {
-  display: grid;
-  gap: 14px;
-  grid-template-columns: 1.15fr 1fr 1fr;
-}
-
-.panel {
+.flow-rail {
   background: #ffffff;
   border: 1px solid #dce2da;
   border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-bottom: 14px;
+  padding: 10px;
+}
+
+.flow-rail div {
+  align-items: center;
+  border-radius: 8px;
+  color: #6b756f;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+}
+
+.flow-rail .active {
+  background: #e7f7ef;
+  color: #17201b;
+}
+
+.flow-rail span,
+.panel-header span {
+  align-items: center;
+  background: #18a56b;
+  border-radius: 999px;
+  color: #ffffff;
+  display: grid;
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 900;
+  height: 26px;
+  place-items: center;
+  width: 26px;
+}
+
+.console-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 1.08fr 1fr 1fr;
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid #dce2da;
+  border-radius: 8px;
+  box-shadow: 0 16px 45px rgba(18, 30, 23, 0.07);
   display: flex;
   flex-direction: column;
   gap: 14px;
-  min-height: 360px;
+  min-height: 354px;
   padding: 16px;
 }
 
@@ -147,34 +233,30 @@ h2 {
   gap: 10px;
 }
 
-.panel-header span {
-  align-items: center;
-  background: #17a56b;
-  border-radius: 999px;
-  color: #ffffff;
-  display: grid;
-  font-size: 0.8rem;
-  font-weight: 900;
-  height: 26px;
-  place-items: center;
-  width: 26px;
-}
-
 .dropzone {
   align-items: center;
-  aspect-ratio: 16 / 10;
-  background: #eef3ef;
-  border: 1px dashed #aeb9b1;
+  aspect-ratio: 16 / 9;
+  background:
+    linear-gradient(135deg, rgba(24, 165, 107, 0.1), rgba(17, 24, 21, 0.03)),
+    #f8faf7;
+  border: 1px dashed #9fb0a6;
   border-radius: 8px;
   color: #52655c;
   display: grid;
-  min-height: 190px;
+  min-height: 180px;
   overflow: hidden;
   place-items: center;
 }
 
 .dropzone input {
   display: none;
+}
+
+.dropzone strong {
+  background: #ffffff;
+  border: 1px solid #dce2da;
+  border-radius: 999px;
+  padding: 0.75rem 1rem;
 }
 
 .dropzone img {
@@ -193,15 +275,21 @@ h2 {
 
 .sample-row button {
   background: #27614a;
-  padding: 0.7rem 0.85rem;
+  min-height: 40px;
+  padding: 0.65rem 0.85rem;
 }
 
-small {
-  color: #61706a;
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 800;
-  margin-bottom: 4px;
+.sample-row button:last-child {
+  background: #5d3b18;
+}
+
+.metric-row div,
+.receipt-block,
+.risk-score {
+  background: #f8faf7;
+  border: 1px solid #dce2da;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .ocr-list,
@@ -220,7 +308,8 @@ small {
 .ocr-list p,
 .warnings p,
 .explanation {
-  background: #edf7f1;
+  background: #eef8f2;
+  border: 1px solid #d5eadf;
   border-radius: 8px;
   padding: 10px;
 }
@@ -233,32 +322,37 @@ small {
   color: #52655c;
   display: grid;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 850;
   gap: 6px;
+  text-transform: uppercase;
 }
 
 input,
 select,
 textarea {
+  background: #ffffff;
   border: 1px solid #cbd5cf;
   border-radius: 8px;
+  color: #17201b;
   min-width: 0;
-  padding: 0.7rem 0.75rem;
+  padding: 0.72rem 0.78rem;
   width: 100%;
 }
 
 textarea {
-  min-height: 170px;
+  line-height: 1.42;
+  min-height: 190px;
   resize: vertical;
 }
 
 .warnings p {
-  background: #fff4da;
+  background: #fff5df;
+  border-color: #ecd39a;
   color: #63470c;
 }
 
 .risk-panel.safe .risk-score {
-  background: #ddf7e8;
+  background: #dbf8e8;
   border-color: #8ccaa8;
 }
 
@@ -269,7 +363,7 @@ textarea {
 }
 
 .risk-panel.block .risk-score {
-  background: #ffe2df;
+  background: #ffe6e3;
   border-color: #df9088;
 }
 
@@ -283,44 +377,68 @@ textarea {
 }
 
 .risk-score strong {
-  font-size: 1.7rem;
+  font-size: 2rem;
 }
 
 .risk-score b {
   align-self: center;
+  background: #ffffff;
+  border-radius: 999px;
+  padding: 0.4rem 0.65rem;
 }
 
 code {
   background: #f4f6f1;
+  border: 1px solid #dce2da;
   border-radius: 8px;
   display: block;
   overflow-wrap: anywhere;
   padding: 10px;
 }
 
-@media (max-width: 1100px) {
+.wallet-panel button:last-of-type {
+  background: #18a56b;
+}
+
+.receipt-panel .receipt-block p {
+  line-height: 1.4;
+}
+
+@media (max-width: 1120px) {
+  .topbar,
   .console-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .flow-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   .app-shell {
     padding: 14px;
   }
 
-  .topbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
+  .topbar,
   .stack-strip,
+  .flow-rail,
   .console-grid {
     grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    padding: 20px;
   }
 
   .input-panel,
   .receipt-panel {
     grid-row: auto;
+  }
+
+  .button-row,
+  .sample-row,
+  .metric-row {
+    grid-template-columns: 1fr;
   }
 }

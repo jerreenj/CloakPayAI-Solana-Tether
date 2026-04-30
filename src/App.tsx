@@ -233,12 +233,16 @@ export default function App() {
     <main className="app-shell">
       <section className="workspace">
         <header className="topbar">
-          <div>
+          <div className="hero-copy">
             <p className="eyebrow">QVAC Payment Firewall</p>
             <h1>CloakPay AI</h1>
             <p className="subtitle">{productDescription}</p>
+            <p className="hero-note">A judge-ready demo for checking private payment context before a wallet signs on Solana devnet.</p>
           </div>
-          <div className="status-pill">{message}</div>
+          <div className="status-pill">
+            <small>Live demo status</small>
+            <strong>{message}</strong>
+          </div>
         </header>
 
         <section className="stack-strip">
@@ -246,6 +250,15 @@ export default function App() {
             <div key={label}>
               <small>{label}</small>
               <strong>{value}</strong>
+            </div>
+          ))}
+        </section>
+
+        <section className="flow-rail" aria-label="Demo flow">
+          {["Input", "Analyze", "Decide", "Review", "Sign", "Receipt"].map((step, index) => (
+            <div key={step} className={index < 2 || analysis ? "active" : ""}>
+              <span>{index + 1}</span>
+              <strong>{step}</strong>
             </div>
           ))}
         </section>
@@ -286,7 +299,7 @@ export default function App() {
           <section className="panel analysis-panel">
             <div className="panel-header">
               <span>2</span>
-              <h2>QVAC Analysis</h2>
+              <h2>Local Analysis</h2>
             </div>
             <div className="metric-row">
               <div>

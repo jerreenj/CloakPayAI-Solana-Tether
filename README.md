@@ -55,6 +55,12 @@ QVAC_MOCK=0 npm run dev
 
 Default mode keeps a clearly labeled local fallback so the demo can be rehearsed without waiting on model setup.
 
+## Vercel
+
+The app can run on Vercel's free tier. The deployed version uses the same `/api` paths through serverless functions, so the safe/risky sample demo works without a separate paid backend.
+
+Live QVAC OCR should still be demoed locally with `QVAC_MOCK=0` when model setup is ready. The Vercel deploy is for the public product preview and fallback demo path.
+
 ## API
 
 - `GET /api/qvac/status`

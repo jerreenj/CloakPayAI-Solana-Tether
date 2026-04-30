@@ -18,6 +18,10 @@ CloakPay AI is a local-first QVAC payment firewall for Solana payments. It check
 
 The invoice stayed local. QVAC/local analysis checked the payment before signing. Solana only received the final devnet payment.
 
+## Vercel Note
+
+The public Vercel page is the preview. The live QVAC OCR story is strongest in the local demo because QVAC is meant to run locally/on-device; the deployed fallback path proves the product flow without paid infrastructure.
+
 ## $0 Checklist
 
 - No paid AI API.
