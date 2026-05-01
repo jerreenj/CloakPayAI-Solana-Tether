@@ -464,7 +464,7 @@ export default function App() {
   return (
     <main className="site-shell">
       <PrismaHero activeSection={activeSection} onNavigate={setActiveSection} />
-      <section className="app-shell">
+      <section className={`app-shell section-${activeSection}`}>
         <section className="workspace">
         <nav className="section-tabs" aria-label="CloakPay sections">
           {sectionNav.map((item) => (
