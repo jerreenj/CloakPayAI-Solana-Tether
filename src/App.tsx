@@ -1,5 +1,7 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
+import { PrismaHero } from "./components/ui/prisma-hero";
 import { clearFeedback, loadFeedback, loadHistory, saveFeedbackItem, saveHistoryItem, updateHistoryItem } from "./localStore";
 import { analyzeLocally, createLocalReceipt } from "./localAnalysis";
 import type {
@@ -242,6 +244,12 @@ export default function App() {
     setMessage("Feedback saved locally. Export it or open a GitHub issue when ready.");
   }
 
+  function navigateToSection(event: MouseEvent<HTMLAnchorElement>, href: string) {
+    event.preventDefault();
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.history.replaceState(null, "", href);
+  }
+
   async function tryWithoutWallet() {
     setBusy(true);
     setFile(null);
@@ -429,14 +437,26 @@ export default function App() {
   }
 
   return (
-    <main className="app-shell">
-      <section className="workspace">
+    <main className="site-shell">
+      <PrismaHero />
+      <section id="demo" className="app-shell">
+        <section className="workspace">
+        <nav className="section-tabs" aria-label="CloakPay sections">
+          <a href="#demo" onClick={(event) => navigateToSection(event, "#demo")}>Demo</a>
+          <a href="#firewall" onClick={(event) => navigateToSection(event, "#firewall")}>Firewall</a>
+          <a href="#readiness" onClick={(event) => navigateToSection(event, "#readiness")}>Readiness</a>
+          <a href="#history" onClick={(event) => navigateToSection(event, "#history")}>History</a>
+          <a href="#feedback" onClick={(event) => navigateToSection(event, "#feedback")}>Feedback</a>
+        </nav>
         <header className="topbar">
           <div className="hero-copy">
-            <p className="eyebrow">QVAC Payment Firewall</p>
-            <h1>CloakPay AI</h1>
+            <p className="eyebrow">Product Console</p>
+            <h1>Payment Firewall Console</h1>
             <p className="subtitle">{productDescription}</p>
-            <p className="hero-note">A judge-ready demo for checking private payment context before a wallet signs on Solana devnet.</p>
+            <p className="hero-note">
+              Upload or paste a payment request, run QVAC/local analysis, review the risk decision, sign on devnet, then save a
+              privacy receipt.
+            </p>
           </div>
           <div className="status-pill">
             <small>Live demo status</small>
@@ -489,7 +509,7 @@ export default function App() {
           </div>
         </section>
 
-        <section className="readiness-board" aria-label="Production readiness">
+        <section id="readiness" className="readiness-board" aria-label="Production readiness">
           <div className="section-heading">
             <small>Production path</small>
             <h2>Mainnet stays locked until the company-grade controls are real.</h2>
@@ -504,7 +524,7 @@ export default function App() {
           </div>
         </section>
 
-        <div className="console-grid">
+        <div id="firewall" className="console-grid">
           <section className="panel input-panel">
             <div className="panel-header">
               <span>1</span>
@@ -707,7 +727,7 @@ export default function App() {
         </div>
 
         <section className="community-grid" aria-label="User feedback and local account history">
-          <section className="panel history-panel">
+          <section id="history" className="panel history-panel">
             <div className="panel-header">
               <span>7</span>
               <h2>Local User History</h2>
@@ -736,7 +756,7 @@ export default function App() {
             </button>
           </section>
 
-          <section className="panel feedback-panel">
+          <section id="feedback" className="panel feedback-panel">
             <div className="panel-header">
               <span>8</span>
               <h2>Preview Feedback Loop</h2>
@@ -791,6 +811,7 @@ export default function App() {
             </div>
           </section>
         </section>
+      </section>
       </section>
     </main>
   );

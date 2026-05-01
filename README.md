@@ -45,10 +45,11 @@ The story: private invoice data is analyzed locally before signing; Solana only 
 - Local browser history for analysis, receipt, and transaction proof.
 - Local feedback inbox with JSON export and GitHub issue handoff.
 - Production readiness panel that keeps mainnet locked until the required controls are real.
+- Section navigation for Demo, Firewall, Readiness, History, and Feedback.
 
 ## Tech Stack
 
-- Frontend: Vite, React, TypeScript.
+- Frontend: Vite, React, TypeScript, Tailwind CSS, Framer Motion, Lucide icons.
 - Local API: Node.js, Express, TypeScript.
 - AI: `@qvac/sdk` OCR, with fallback mode for demo reliability.
 - Blockchain: `@solana/web3.js` on public devnet.
