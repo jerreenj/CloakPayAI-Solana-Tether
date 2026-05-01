@@ -1,7 +1,9 @@
 import { motion, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import type { CSSProperties, MouseEvent } from "react";
+import type { CSSProperties } from "react";
 import { useRef } from "react";
+
+export type ProductSection = "demo" | "firewall" | "readiness" | "history" | "feedback";
 
 interface WordsPullUpProps {
   text: string;
@@ -77,24 +79,24 @@ export const WordsPullUpMultiStyle = ({ segments, className = "", style }: Words
   );
 };
 
-const navItems = [
-  ["Demo", "#demo"],
-  ["Firewall", "#firewall"],
-  ["Readiness", "#readiness"],
-  ["History", "#history"],
-  ["Feedback", "#feedback"]
+const navItems: { label: string; value: ProductSection }[] = [
+  { label: "Demo", value: "demo" },
+  { label: "Firewall", value: "firewall" },
+  { label: "Readiness", value: "readiness" },
+  { label: "History", value: "history" },
+  { label: "Feedback", value: "feedback" }
 ];
 
 const heroVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 
-const PrismaHero = () => {
-  function navigateTo(event: MouseEvent<HTMLAnchorElement>, href: string) {
-    event.preventDefault();
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.history.replaceState(null, "", href);
-  }
-
+const PrismaHero = ({
+  activeSection,
+  onNavigate
+}: {
+  activeSection: ProductSection;
+  onNavigate: (section: ProductSection) => void;
+}) => {
   return (
     <section className="prisma-hero" aria-label="CloakPay AI product intro">
       <div className="prisma-hero-frame">
@@ -104,10 +106,15 @@ const PrismaHero = () => {
 
         <nav className="prisma-hero-nav" aria-label="Page navigation">
           <div>
-            {navItems.map(([item, href]) => (
-              <a key={item} href={href} onClick={(event) => navigateTo(event, href)}>
-                {item}
-              </a>
+            {navItems.map((item) => (
+              <button
+                key={item.value}
+                type="button"
+                className={activeSection === item.value ? "active" : ""}
+                onClick={() => onNavigate(item.value)}
+              >
+                {item.label}
+              </button>
             ))}
           </div>
         </nav>
@@ -125,16 +132,12 @@ const PrismaHero = () => {
               devnet for the public preview.
             </p>
 
-            <a
-              href="#demo"
-              onClick={(event) => navigateTo(event, "#demo")}
-              className="prisma-hero-cta"
-            >
+            <button type="button" onClick={() => onNavigate("firewall")} className="prisma-hero-cta">
               Go to app
               <span>
                 <ArrowRight aria-hidden="true" />
               </span>
-            </a>
+            </button>
           </div>
         </div>
       </div>

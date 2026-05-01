@@ -1,7 +1,6 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import type { MouseEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
-import { PrismaHero } from "./components/ui/prisma-hero";
+import { PrismaHero, type ProductSection } from "./components/ui/prisma-hero";
 import { clearFeedback, loadFeedback, loadHistory, saveFeedbackItem, saveHistoryItem, updateHistoryItem } from "./localStore";
 import { analyzeLocally, createLocalReceipt } from "./localAnalysis";
 import type {
@@ -49,6 +48,37 @@ Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase
 
 const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
 const faucetUrl = "https://faucet.solana.com/";
+
+const sectionNav: { label: string; value: ProductSection }[] = [
+  { label: "Demo", value: "demo" },
+  { label: "Firewall", value: "firewall" },
+  { label: "Readiness", value: "readiness" },
+  { label: "History", value: "history" },
+  { label: "Feedback", value: "feedback" }
+];
+
+const sectionCopy: Record<ProductSection, { title: string; detail: string }> = {
+  demo: {
+    title: "Preview Command Center",
+    detail: "Fast path for first-time users: run without a wallet, understand the stack, and see the demo flow."
+  },
+  firewall: {
+    title: "Payment Firewall",
+    detail: "Extract payment details, score invoice risk, review intent, prepare a devnet transaction, and create a privacy receipt."
+  },
+  readiness: {
+    title: "Production Readiness",
+    detail: "What is real today, what is locked for mainnet, and what needs to be true before real-money payment flows."
+  },
+  history: {
+    title: "Local User History",
+    detail: "A free browser-only activity trail for analysis, receipts, and devnet transaction proof."
+  },
+  feedback: {
+    title: "Feedback Loop",
+    detail: "Capture user issues, wallet friction, invoice formats, and mainnet asks without adding a paid backend."
+  }
+};
 
 function bytesFromBase64(value: string) {
   const binary = window.atob(value);
@@ -113,6 +143,7 @@ export default function App() {
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>("bug");
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackEmail, setFeedbackEmail] = useState("");
+  const [activeSection, setActiveSection] = useState<ProductSection>("demo");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Ready for local payment analysis.");
 
@@ -242,12 +273,6 @@ export default function App() {
     setFeedbackItems(saveFeedbackItem(item));
     setFeedbackText("");
     setMessage("Feedback saved locally. Export it or open a GitHub issue when ready.");
-  }
-
-  function navigateToSection(event: MouseEvent<HTMLAnchorElement>, href: string) {
-    event.preventDefault();
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    window.history.replaceState(null, "", href);
   }
 
   async function tryWithoutWallet() {
@@ -438,16 +463,34 @@ export default function App() {
 
   return (
     <main className="site-shell">
-      <PrismaHero />
-      <section id="demo" className="app-shell">
+      <PrismaHero activeSection={activeSection} onNavigate={setActiveSection} />
+      <section className="app-shell">
         <section className="workspace">
         <nav className="section-tabs" aria-label="CloakPay sections">
-          <a href="#demo" onClick={(event) => navigateToSection(event, "#demo")}>Demo</a>
-          <a href="#firewall" onClick={(event) => navigateToSection(event, "#firewall")}>Firewall</a>
-          <a href="#readiness" onClick={(event) => navigateToSection(event, "#readiness")}>Readiness</a>
-          <a href="#history" onClick={(event) => navigateToSection(event, "#history")}>History</a>
-          <a href="#feedback" onClick={(event) => navigateToSection(event, "#feedback")}>Feedback</a>
+          {sectionNav.map((item) => (
+            <button
+              key={item.value}
+              type="button"
+              className={activeSection === item.value ? "active" : ""}
+              onClick={() => setActiveSection(item.value)}
+            >
+              {item.label}
+            </button>
+          ))}
         </nav>
+        <header className="view-header">
+          <div>
+            <small>Internal section</small>
+            <h1>{sectionCopy[activeSection].title}</h1>
+            <p>{sectionCopy[activeSection].detail}</p>
+          </div>
+          <div className="status-pill">
+            <small>Live demo status</small>
+            <strong>{message}</strong>
+          </div>
+        </header>
+        {activeSection === "demo" && (
+          <>
         <header className="topbar">
           <div className="hero-copy">
             <p className="eyebrow">Product Console</p>
@@ -508,7 +551,10 @@ export default function App() {
             </a>
           </div>
         </section>
+          </>
+        )}
 
+        {activeSection === "readiness" && (
         <section id="readiness" className="readiness-board" aria-label="Production readiness">
           <div className="section-heading">
             <small>Production path</small>
@@ -523,7 +569,9 @@ export default function App() {
             ))}
           </div>
         </section>
+        )}
 
+        {activeSection === "firewall" && (
         <div id="firewall" className="console-grid">
           <section className="panel input-panel">
             <div className="panel-header">
@@ -725,8 +773,11 @@ export default function App() {
             </div>
           </section>
         </div>
+        )}
 
-        <section className="community-grid" aria-label="User feedback and local account history">
+        {(activeSection === "history" || activeSection === "feedback") && (
+        <section className="community-grid single-community" aria-label="User feedback and local account history">
+          {activeSection === "history" && (
           <section id="history" className="panel history-panel">
             <div className="panel-header">
               <span>7</span>
@@ -755,7 +806,9 @@ export default function App() {
               Export History
             </button>
           </section>
+          )}
 
+          {activeSection === "feedback" && (
           <section id="feedback" className="panel feedback-panel">
             <div className="panel-header">
               <span>8</span>
@@ -810,7 +863,9 @@ export default function App() {
               <span>saved local feedback item{feedbackItems.length === 1 ? "" : "s"}</span>
             </div>
           </section>
+          )}
         </section>
+        )}
       </section>
       </section>
     </main>
