@@ -1,6 +1,6 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useEffect, useMemo, useState } from "react";
-import { PrismaHero, type ProductSection } from "./components/ui/prisma-hero";
+import { PrismaHero } from "./components/ui/prisma-hero";
 import { clearFeedback, loadFeedback, loadHistory, saveFeedbackItem, saveHistoryItem, updateHistoryItem } from "./localStore";
 import { analyzeLocally, createLocalReceipt } from "./localAnalysis";
 import type {
@@ -48,37 +48,6 @@ Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase
 
 const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
 const faucetUrl = "https://faucet.solana.com/";
-
-const sectionNav: { label: string; value: ProductSection }[] = [
-  { label: "Demo", value: "demo" },
-  { label: "Firewall", value: "firewall" },
-  { label: "Readiness", value: "readiness" },
-  { label: "History", value: "history" },
-  { label: "Feedback", value: "feedback" }
-];
-
-const sectionCopy: Record<ProductSection, { title: string; detail: string }> = {
-  demo: {
-    title: "Preview Command Center",
-    detail: "Fast path for first-time users: run without a wallet, understand the stack, and see the demo flow."
-  },
-  firewall: {
-    title: "Payment Firewall",
-    detail: "Extract payment details, score invoice risk, review intent, prepare a devnet transaction, and create a privacy receipt."
-  },
-  readiness: {
-    title: "Production Readiness",
-    detail: "What is real today, what is locked for mainnet, and what needs to be true before real-money payment flows."
-  },
-  history: {
-    title: "Local User History",
-    detail: "A free browser-only activity trail for analysis, receipts, and devnet transaction proof."
-  },
-  feedback: {
-    title: "Feedback Loop",
-    detail: "Capture user issues, wallet friction, invoice formats, and mainnet asks without adding a paid backend."
-  }
-};
 
 function bytesFromBase64(value: string) {
   const binary = window.atob(value);
@@ -143,7 +112,6 @@ export default function App() {
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>("bug");
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackEmail, setFeedbackEmail] = useState("");
-  const [activeSection, setActiveSection] = useState<ProductSection>("demo");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Ready for local payment analysis.");
 
@@ -463,410 +431,426 @@ export default function App() {
 
   return (
     <main className="site-shell">
-      <PrismaHero activeSection={activeSection} onNavigate={setActiveSection} />
-      <section className={`app-shell section-${activeSection}`}>
-        <section className="workspace">
-        <nav className="section-tabs" aria-label="CloakPay sections">
-          {sectionNav.map((item) => (
-            <button
-              key={item.value}
-              type="button"
-              className={activeSection === item.value ? "active" : ""}
-              onClick={() => setActiveSection(item.value)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </nav>
-        <header className="view-header">
-          <div>
-            <small>Internal section</small>
-            <h1>{sectionCopy[activeSection].title}</h1>
-            <p>{sectionCopy[activeSection].detail}</p>
-          </div>
-          <div className="status-pill">
-            <small>Live demo status</small>
-            <strong>{message}</strong>
-          </div>
-        </header>
-        {activeSection === "demo" && (
-          <>
-        <header className="topbar">
-          <div className="hero-copy">
-            <p className="eyebrow">Product Console</p>
-            <h1>Payment Firewall Console</h1>
-            <p className="subtitle">{productDescription}</p>
-            <p className="hero-note">
-              Upload or paste a payment request, run QVAC/local analysis, review the risk decision, sign on devnet, then save a
-              privacy receipt.
-            </p>
-          </div>
-          <div className="status-pill">
-            <small>Live demo status</small>
-            <strong>{message}</strong>
-          </div>
-        </header>
+      <PrismaHero />
 
-        <section className="stack-strip">
-          {stackStatus.map(([label, value]) => (
-            <div key={label}>
-              <small>{label}</small>
-              <strong>{value}</strong>
-            </div>
-          ))}
-        </section>
-
-        <section className="flow-rail" aria-label="Demo flow">
-          {["Input", "Analyze", "Decide", "Review", "Sign", "Receipt"].map((step, index) => (
-            <div key={step} className={index < 2 || analysis ? "active" : ""}>
-              <span>{index + 1}</span>
-              <strong>{step}</strong>
-            </div>
-          ))}
-        </section>
-
-        <section className="user-guide" aria-label="First time guide">
-          <div>
-            <small>Start here</small>
-            <strong>Try the firewall before connecting a wallet.</strong>
-            <p>Run a safe or risky sample to see how CloakPay catches payment risk before signing.</p>
-            <button type="button" disabled={busy} onClick={tryWithoutWallet}>
-              Try Without Wallet
-            </button>
-          </div>
-          <div>
-            <small>Wallet testers</small>
-            <strong>Use devnet only.</strong>
-            <p>No mainnet, no real funds, no paid RPC. Get faucet SOL, connect wallet, then sign a devnet transfer.</p>
-            <a href={faucetUrl} target="_blank" rel="noreferrer">
-              Get Devnet SOL
-            </a>
-          </div>
-          <div>
-            <small>Feedback</small>
-            <strong>Help shape the real product.</strong>
-            <p>Send bugs, confusing screens, wallet issues, or invoice cases we should support next.</p>
-            <a href={feedbackUrl} target="_blank" rel="noreferrer">
-              Leave Feedback
-            </a>
-          </div>
-        </section>
-          </>
-        )}
-
-        {activeSection === "readiness" && (
-        <section id="readiness" className="readiness-board" aria-label="Production readiness">
-          <div className="section-heading">
-            <small>Production path</small>
-            <h2>Mainnet stays locked until the company-grade controls are real.</h2>
-          </div>
-          <div className="readiness-grid">
-            {productionReadiness.map(([label, value]) => (
-              <div key={label}>
-                <strong>{label}</strong>
-                <p>{value}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-        )}
-
-        {activeSection === "firewall" && (
-        <div id="firewall" className="console-grid">
-          <section className="panel input-panel">
-            <div className="panel-header">
-              <span>1</span>
-              <h2>Payment Input</h2>
-            </div>
-            <label className="dropzone">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(event) => onFileSelected(event.target.files?.[0] ?? null)}
-              />
-              {imagePreview ? <img src={imagePreview} alt="Payment upload preview" /> : <strong>Upload invoice image</strong>}
-            </label>
-            <div className="sample-row">
-              <button type="button" disabled={busy} onClick={() => loadSample(safeInvoice)}>
-                Safe Sample
-              </button>
-              <button type="button" disabled={busy} onClick={() => loadSample(suspiciousInvoice)}>
-                Risky Sample
-              </button>
-            </div>
-            <textarea value={invoiceText} onChange={(event) => setInvoiceText(event.target.value)} />
-            <div className="button-row">
-              <button disabled={busy} onClick={() => analyzePayment(true)}>
-                Run Sample
-              </button>
-              <button disabled={busy || (!file && !invoiceText.trim())} onClick={() => analyzePayment(false)}>
-                Analyze
-              </button>
-            </div>
-          </section>
-
-          <section className="panel analysis-panel">
-            <div className="panel-header">
-              <span>2</span>
-              <h2>Local Analysis</h2>
-            </div>
-            <div className="metric-row">
+      <section className="app-shell" aria-label="CloakPay AI product workspace">
+        <section id="demo" className="app-section demo-section">
+          <div className="section-inner">
+            <header className="view-header">
               <div>
-                <small>Mode</small>
-                <strong>{analysis?.mode ?? qvacStatus?.mode ?? "Pending"}</strong>
+                <small>Demo</small>
+                <h1>Preview Command Center</h1>
+                <p>Fast path for first-time users: try the firewall, see the stack, then jump into the real devnet flow.</p>
               </div>
-              <div>
-                <small>Runtime</small>
-                <strong>{analysis ? `${analysis.qvacStats.processingMs}ms` : "Idle"}</strong>
+              <div className="status-pill">
+                <small>Live demo status</small>
+                <strong>{message}</strong>
               </div>
-              <div>
-                <small>Local Only</small>
-                <strong>{qvacStatus?.localOnly ? "Yes" : "Checking"}</strong>
-              </div>
-              <div>
-                <small>Paid Services</small>
-                <strong>{qvacStatus?.paidServices === false ? "None" : "None"}</strong>
-              </div>
-            </div>
-            <div className="ocr-list">
-              {(analysis?.blocks ?? []).map((block, index) => (
-                <p key={`${block.text}-${index}`}>{block.text}</p>
+            </header>
+
+            <section className="stack-strip">
+              {stackStatus.map(([label, value]) => (
+                <div key={label}>
+                  <small>{label}</small>
+                  <strong>{value}</strong>
+                </div>
               ))}
-              {!analysis && <p className="muted">OCR blocks and local analysis evidence will appear here.</p>}
-            </div>
-          </section>
+            </section>
 
-          <section className={`panel risk-panel ${riskClass}`}>
-            <div className="panel-header">
-              <span>3</span>
-              <h2>Risk Decision</h2>
-            </div>
-            <div className="risk-score">
-              <small>Verdict</small>
-              <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
-              <b>{analysis?.riskReport.score ?? 0}/100</b>
-            </div>
-            <p className="explanation">{analysis?.riskReport.explanation ?? "Run analysis to score the payment."}</p>
-            <div className="warnings">
-              {(analysis?.riskReport.warnings ?? []).map((warning) => (
-                <p key={warning}>{warning}</p>
+            <section className="flow-rail" aria-label="Demo flow">
+              {["Input", "Analyze", "Decide", "Review", "Sign", "Receipt"].map((step, index) => (
+                <div key={step} className={index < 2 || analysis ? "active" : ""}>
+                  <span>{index + 1}</span>
+                  <strong>{step}</strong>
+                </div>
               ))}
-            </div>
-            <div className="evidence-list">
-              {(analysis?.riskReport.evidence ?? []).map((item) => (
-                <code key={item}>{item}</code>
-              ))}
-            </div>
-          </section>
+            </section>
 
-          <section className="panel review-panel">
-            <div className="panel-header">
-              <span>4</span>
-              <h2>Intent Review</h2>
-            </div>
-            <label>
-              Merchant
-              <input value={intent?.merchant ?? ""} onChange={(event) => intent && setIntent({ ...intent, merchant: event.target.value })} />
-            </label>
-            <label>
-              Recipient
-              <input
-                value={intent?.recipientAddress ?? ""}
-                onChange={(event) => intent && setIntent({ ...intent, recipientAddress: event.target.value })}
-              />
-            </label>
-            <label>
-              Amount
-              <input
-                type="number"
-                min="0"
-                step="0.001"
-                value={intent?.amount ?? ""}
-                onChange={(event) => intent && setIntent({ ...intent, amount: Number(event.target.value) })}
-              />
-            </label>
-            <label>
-              Token
-              <select
-                value={intent?.token ?? "SOL"}
-                onChange={(event) => intent && setIntent({ ...intent, token: event.target.value as PaymentIntent["token"] })}
-              >
-                <option>SOL</option>
-                <option>USDT</option>
-                <option>UNKNOWN</option>
-              </select>
-            </label>
-            <label>
-              Memo
-              <input value={intent?.memo ?? ""} onChange={(event) => intent && setIntent({ ...intent, memo: event.target.value })} />
-            </label>
-          </section>
-
-          <section className="panel wallet-panel">
-            <div className="panel-header">
-              <span>5</span>
-              <h2>Sign On Devnet</h2>
-            </div>
-            <div className="safety-banner">
-              Devnet preview only. Mainnet payments are disabled until audits, production monitoring, and user safeguards are ready.
-            </div>
-            <div className="receipt-block">
-              <small>Wallet</small>
-              <strong>{formatAddress(walletAddress)}</strong>
-            </div>
-            <button disabled={busy || Boolean(walletAddress)} onClick={connectWallet}>
-              Connect Wallet
-            </button>
-            <button disabled={busy || !intent || !walletAddress || analysis?.riskReport.verdict === "block"} onClick={prepareTransaction}>
-              Prepare Devnet SOL
-            </button>
-            <button disabled={busy || !canSend} onClick={signAndSend}>
-              Sign And Send
-            </button>
-            {prepared && (
-              <div className="receipt-block">
-                <small>Prepared transfer</small>
-                <p>{prepared.lamports} lamports to {formatAddress(prepared.to)}</p>
+            <section className="user-guide" aria-label="First time guide">
+              <div>
+                <small>Start here</small>
+                <strong>Try the firewall before connecting a wallet.</strong>
+                <p>Run a safe or risky sample to see how CloakPay catches payment risk before signing.</p>
+                <button type="button" disabled={busy} onClick={tryWithoutWallet}>
+                  Try Without Wallet
+                </button>
               </div>
-            )}
-            {txSignature && (
-              <a href={`https://explorer.solana.com/tx/${txSignature}?cluster=devnet`} target="_blank" rel="noreferrer">
-                View devnet transaction
-              </a>
-            )}
-          </section>
-
-          <section className="panel receipt-panel">
-            <div className="panel-header">
-              <span>6</span>
-              <h2>Privacy Receipt</h2>
-            </div>
-            <button disabled={busy || !intent} onClick={createReceipt}>
-              Create Receipt
-            </button>
-            {receipt ? (
-              <div className="receipt-stack">
-                <div className="receipt-block">
-                  <small>Redacted summary</small>
-                  <p>{receipt.redactedSummary}</p>
-                </div>
-                <div className="receipt-block">
-                  <small>Invoice hash</small>
-                  <code>{receipt.invoiceHash}</code>
-                </div>
-                <div className="receipt-block">
-                  <small>Commitment</small>
-                  <code>{receipt.commitment}</code>
-                </div>
-                <div className="receipt-block">
-                  <small>Nullifier preview</small>
-                  <code>{receipt.nullifierHash}</code>
-                </div>
+              <div>
+                <small>Wallet testers</small>
+                <strong>Use devnet only.</strong>
+                <p>No mainnet, no real funds, no paid RPC. Get faucet SOL, connect wallet, then sign a devnet transfer.</p>
+                <a href={faucetUrl} target="_blank" rel="noreferrer">
+                  Get Devnet SOL
+                </a>
               </div>
-            ) : (
-              <p className="muted">Receipt will prove what was checked without exposing private invoice text.</p>
-            )}
-            <div className="feedback-footer">
-              <a href={feedbackUrl} target="_blank" rel="noreferrer">
-                Report issue or request feature
-              </a>
-            </div>
-          </section>
-        </div>
-        )}
+              <div>
+                <small>Feedback</small>
+                <strong>Help shape the real product.</strong>
+                <p>Send bugs, confusing screens, wallet issues, or invoice cases we should support next.</p>
+                <a href={feedbackUrl} target="_blank" rel="noreferrer">
+                  Leave Feedback
+                </a>
+              </div>
+            </section>
+          </div>
+        </section>
 
-        {(activeSection === "history" || activeSection === "feedback") && (
-        <section className="community-grid single-community" aria-label="User feedback and local account history">
-          {activeSection === "history" && (
-          <section id="history" className="panel history-panel">
-            <div className="panel-header">
-              <span>7</span>
-              <h2>Local User History</h2>
-            </div>
-            <p className="muted">
-              A free preview account lives in this browser only. No database, no paid storage, and no cloud profile is created.
-            </p>
-            <div className="history-list">
-              {history.map((item) => (
-                <div key={item.id} className="history-item">
+        <section id="firewall" className="app-section firewall-section">
+          <div className="section-inner">
+            <header className="view-header">
+              <div>
+                <small>Firewall</small>
+                <h1>Payment Firewall</h1>
+                <p>{productDescription} Extract payment details, score invoice risk, review intent, sign on devnet, and save a privacy receipt.</p>
+              </div>
+              <div className="status-pill">
+                <small>Risk decision</small>
+                <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
+              </div>
+            </header>
+
+            <div className="console-grid">
+              <section className="panel input-panel">
+                <div className="panel-header">
+                  <span>1</span>
+                  <h2>Payment Input</h2>
+                </div>
+                <label className="dropzone">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) => onFileSelected(event.target.files?.[0] ?? null)}
+                  />
+                  {imagePreview ? <img src={imagePreview} alt="Payment upload preview" /> : <strong>Upload invoice image</strong>}
+                </label>
+                <div className="sample-row">
+                  <button type="button" disabled={busy} onClick={() => loadSample(safeInvoice)}>
+                    Safe Sample
+                  </button>
+                  <button type="button" disabled={busy} onClick={() => loadSample(suspiciousInvoice)}>
+                    Risky Sample
+                  </button>
+                </div>
+                <textarea value={invoiceText} onChange={(event) => setInvoiceText(event.target.value)} />
+                <div className="button-row">
+                  <button disabled={busy} onClick={() => analyzePayment(true)}>
+                    Run Sample
+                  </button>
+                  <button disabled={busy || (!file && !invoiceText.trim())} onClick={() => analyzePayment(false)}>
+                    Analyze
+                  </button>
+                </div>
+              </section>
+
+              <section className="panel analysis-panel">
+                <div className="panel-header">
+                  <span>2</span>
+                  <h2>Local Analysis</h2>
+                </div>
+                <div className="metric-row">
                   <div>
-                    <strong>{item.merchant}</strong>
-                    <p>
-                      {item.amount} {item.token} · {verdictLabel(item.verdict)} · {item.score}/100
-                    </p>
+                    <small>Mode</small>
+                    <strong>{analysis?.mode ?? qvacStatus?.mode ?? "Pending"}</strong>
                   </div>
-                  <small>{new Date(item.createdAt).toLocaleString()}</small>
-                  {item.txSignature && <code>{item.txSignature}</code>}
-                  {item.receiptCommitment && <code>{item.receiptCommitment}</code>}
+                  <div>
+                    <small>Runtime</small>
+                    <strong>{analysis ? `${analysis.qvacStats.processingMs}ms` : "Idle"}</strong>
+                  </div>
+                  <div>
+                    <small>Local Only</small>
+                    <strong>{qvacStatus?.localOnly ? "Yes" : "Checking"}</strong>
+                  </div>
+                  <div>
+                    <small>Paid Services</small>
+                    <strong>{qvacStatus?.paidServices === false ? "None" : "None"}</strong>
+                  </div>
                 </div>
-              ))}
-              {!history.length && <p className="muted">Run an analysis to create the first local history item.</p>}
-            </div>
-            <button type="button" disabled={!history.length} onClick={() => downloadJson("cloakpay-history.json", history)}>
-              Export History
-            </button>
-          </section>
-          )}
+                <div className="ocr-list">
+                  {(analysis?.blocks ?? []).map((block, index) => (
+                    <p key={`${block.text}-${index}`}>{block.text}</p>
+                  ))}
+                  {!analysis && <p className="muted">OCR blocks and local analysis evidence will appear here.</p>}
+                </div>
+              </section>
 
-          {activeSection === "feedback" && (
-          <section id="feedback" className="panel feedback-panel">
-            <div className="panel-header">
-              <span>8</span>
-              <h2>Preview Feedback Loop</h2>
+              <section className={`panel risk-panel ${riskClass}`}>
+                <div className="panel-header">
+                  <span>3</span>
+                  <h2>Risk Decision</h2>
+                </div>
+                <div className="risk-score">
+                  <small>Verdict</small>
+                  <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
+                  <b>{analysis?.riskReport.score ?? 0}/100</b>
+                </div>
+                <p className="explanation">{analysis?.riskReport.explanation ?? "Run analysis to score the payment."}</p>
+                <div className="warnings">
+                  {(analysis?.riskReport.warnings ?? []).map((warning) => (
+                    <p key={warning}>{warning}</p>
+                  ))}
+                </div>
+                <div className="evidence-list">
+                  {(analysis?.riskReport.evidence ?? []).map((item) => (
+                    <code key={item}>{item}</code>
+                  ))}
+                </div>
+              </section>
+
+              <section className="panel review-panel">
+                <div className="panel-header">
+                  <span>4</span>
+                  <h2>Intent Review</h2>
+                </div>
+                <label>
+                  Merchant
+                  <input value={intent?.merchant ?? ""} onChange={(event) => intent && setIntent({ ...intent, merchant: event.target.value })} />
+                </label>
+                <label>
+                  Recipient
+                  <input
+                    value={intent?.recipientAddress ?? ""}
+                    onChange={(event) => intent && setIntent({ ...intent, recipientAddress: event.target.value })}
+                  />
+                </label>
+                <label>
+                  Amount
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    value={intent?.amount ?? ""}
+                    onChange={(event) => intent && setIntent({ ...intent, amount: Number(event.target.value) })}
+                  />
+                </label>
+                <label>
+                  Token
+                  <select
+                    value={intent?.token ?? "SOL"}
+                    onChange={(event) => intent && setIntent({ ...intent, token: event.target.value as PaymentIntent["token"] })}
+                  >
+                    <option>SOL</option>
+                    <option>USDT</option>
+                    <option>UNKNOWN</option>
+                  </select>
+                </label>
+                <label>
+                  Memo
+                  <input value={intent?.memo ?? ""} onChange={(event) => intent && setIntent({ ...intent, memo: event.target.value })} />
+                </label>
+              </section>
+
+              <section className="panel wallet-panel">
+                <div className="panel-header">
+                  <span>5</span>
+                  <h2>Sign On Devnet</h2>
+                </div>
+                <div className="safety-banner">
+                  Devnet preview only. Mainnet payments are disabled until audits, production monitoring, and user safeguards are ready.
+                </div>
+                <div className="receipt-block">
+                  <small>Wallet</small>
+                  <strong>{formatAddress(walletAddress)}</strong>
+                </div>
+                <button disabled={busy || Boolean(walletAddress)} onClick={connectWallet}>
+                  Connect Wallet
+                </button>
+                <button disabled={busy || !intent || !walletAddress || analysis?.riskReport.verdict === "block"} onClick={prepareTransaction}>
+                  Prepare Devnet SOL
+                </button>
+                <button disabled={busy || !canSend} onClick={signAndSend}>
+                  Sign And Send
+                </button>
+                {prepared && (
+                  <div className="receipt-block">
+                    <small>Prepared transfer</small>
+                    <p>{prepared.lamports} lamports to {formatAddress(prepared.to)}</p>
+                  </div>
+                )}
+                {txSignature && (
+                  <a href={`https://explorer.solana.com/tx/${txSignature}?cluster=devnet`} target="_blank" rel="noreferrer">
+                    View devnet transaction
+                  </a>
+                )}
+              </section>
+
+              <section className="panel receipt-panel">
+                <div className="panel-header">
+                  <span>6</span>
+                  <h2>Privacy Receipt</h2>
+                </div>
+                <button disabled={busy || !intent} onClick={createReceipt}>
+                  Create Receipt
+                </button>
+                {receipt ? (
+                  <div className="receipt-stack">
+                    <div className="receipt-block">
+                      <small>Redacted summary</small>
+                      <p>{receipt.redactedSummary}</p>
+                    </div>
+                    <div className="receipt-block">
+                      <small>Invoice hash</small>
+                      <code>{receipt.invoiceHash}</code>
+                    </div>
+                    <div className="receipt-block">
+                      <small>Commitment</small>
+                      <code>{receipt.commitment}</code>
+                    </div>
+                    <div className="receipt-block">
+                      <small>Nullifier preview</small>
+                      <code>{receipt.nullifierHash}</code>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="muted">Receipt will prove what was checked without exposing private invoice text.</p>
+                )}
+                <div className="feedback-footer">
+                  <a href={feedbackUrl} target="_blank" rel="noreferrer">
+                    Report issue or request feature
+                  </a>
+                </div>
+              </section>
             </div>
-            <label>
-              Category
-              <select value={feedbackCategory} onChange={(event) => setFeedbackCategory(event.target.value as FeedbackCategory)}>
-                <option value="bug">Bug</option>
-                <option value="wallet">Wallet signing</option>
-                <option value="invoice">Invoice parsing</option>
-                <option value="risk">Risk verdict</option>
-                <option value="mainnet">Mainnet request</option>
-                <option value="other">Other</option>
-              </select>
-            </label>
-            <label>
-              Optional contact
-              <input value={feedbackEmail} onChange={(event) => setFeedbackEmail(event.target.value)} placeholder="email, Telegram, or Discord" />
-            </label>
-            <label>
-              Feedback
-              <textarea
-                value={feedbackText}
-                onChange={(event) => setFeedbackText(event.target.value)}
-                placeholder="What broke, confused you, or should be added before mainnet?"
-              />
-            </label>
-            <div className="button-row">
-              <button type="button" onClick={submitLocalFeedback}>
-                Save Feedback
-              </button>
-              <button type="button" disabled={!feedbackItems.length} onClick={() => downloadJson("cloakpay-feedback.json", feedbackItems)}>
-                Export Feedback
-              </button>
-            </div>
-            <a href={feedbackIssueUrl} target="_blank" rel="noreferrer">
-              Open GitHub Issue
-            </a>
-            <button
-              type="button"
-              disabled={!feedbackItems.length}
-              onClick={() => {
-                setFeedbackItems(clearFeedback());
-                setMessage("Local feedback inbox cleared.");
-              }}
-            >
-              Clear Local Inbox
-            </button>
-            <div className="feedback-count">
-              <strong>{feedbackItems.length}</strong>
-              <span>saved local feedback item{feedbackItems.length === 1 ? "" : "s"}</span>
-            </div>
-          </section>
-          )}
+          </div>
         </section>
-        )}
-      </section>
+
+        <section id="readiness" className="app-section readiness-section">
+          <div className="section-inner">
+            <header className="view-header">
+              <div>
+                <small>Readiness</small>
+                <h1>Production Readiness</h1>
+                <p>What is real today, what is locked for mainnet, and what must be true before real-money payments.</p>
+              </div>
+              <div className="status-pill">
+                <small>Mainnet</small>
+                <strong>Locked until company-grade controls are real.</strong>
+              </div>
+            </header>
+
+            <section className="readiness-board" aria-label="Production readiness">
+              <div className="section-heading">
+                <small>Production path</small>
+                <h2>Mainnet stays locked until the company-grade controls are real.</h2>
+              </div>
+              <div className="readiness-grid">
+                {productionReadiness.map(([label, value]) => (
+                  <div key={label}>
+                    <strong>{label}</strong>
+                    <p>{value}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section id="history" className="app-section history-section">
+          <div className="section-inner narrow-section">
+            <header className="view-header single-column">
+              <div>
+                <small>History</small>
+                <h1>Local User History</h1>
+                <p>A free browser-only activity trail for analyses, receipts, and devnet transaction proof.</p>
+              </div>
+            </header>
+
+            <section className="panel history-panel">
+              <div className="panel-header">
+                <span>7</span>
+                <h2>Local User History</h2>
+              </div>
+              <p className="muted">
+                A free preview account lives in this browser only. No database, no paid storage, and no cloud profile is created.
+              </p>
+              <div className="history-list">
+                {history.map((item) => (
+                  <div key={item.id} className="history-item">
+                    <div>
+                      <strong>{item.merchant}</strong>
+                      <p>
+                        {item.amount} {item.token} · {verdictLabel(item.verdict)} · {item.score}/100
+                      </p>
+                    </div>
+                    <small>{new Date(item.createdAt).toLocaleString()}</small>
+                    {item.txSignature && <code>{item.txSignature}</code>}
+                    {item.receiptCommitment && <code>{item.receiptCommitment}</code>}
+                  </div>
+                ))}
+                {!history.length && <p className="muted">Run an analysis to create the first local history item.</p>}
+              </div>
+              <button type="button" disabled={!history.length} onClick={() => downloadJson("cloakpay-history.json", history)}>
+                Export History
+              </button>
+            </section>
+          </div>
+        </section>
+
+        <section id="feedback" className="app-section feedback-section">
+          <div className="section-inner narrow-section">
+            <header className="view-header single-column">
+              <div>
+                <small>Feedback</small>
+                <h1>Feedback Loop</h1>
+                <p>Capture user issues, wallet friction, invoice formats, and mainnet asks without adding a paid backend.</p>
+              </div>
+            </header>
+
+            <section className="panel feedback-panel">
+              <div className="panel-header">
+                <span>8</span>
+                <h2>Preview Feedback Loop</h2>
+              </div>
+              <label>
+                Category
+                <select value={feedbackCategory} onChange={(event) => setFeedbackCategory(event.target.value as FeedbackCategory)}>
+                  <option value="bug">Bug</option>
+                  <option value="wallet">Wallet signing</option>
+                  <option value="invoice">Invoice parsing</option>
+                  <option value="risk">Risk verdict</option>
+                  <option value="mainnet">Mainnet request</option>
+                  <option value="other">Other</option>
+                </select>
+              </label>
+              <label>
+                Optional contact
+                <input value={feedbackEmail} onChange={(event) => setFeedbackEmail(event.target.value)} placeholder="email, Telegram, or Discord" />
+              </label>
+              <label>
+                Feedback
+                <textarea
+                  value={feedbackText}
+                  onChange={(event) => setFeedbackText(event.target.value)}
+                  placeholder="What broke, confused you, or should be added before mainnet?"
+                />
+              </label>
+              <div className="button-row">
+                <button type="button" onClick={submitLocalFeedback}>
+                  Save Feedback
+                </button>
+                <button type="button" disabled={!feedbackItems.length} onClick={() => downloadJson("cloakpay-feedback.json", feedbackItems)}>
+                  Export Feedback
+                </button>
+              </div>
+              <a href={feedbackIssueUrl} target="_blank" rel="noreferrer">
+                Open GitHub Issue
+              </a>
+              <button
+                type="button"
+                disabled={!feedbackItems.length}
+                onClick={() => {
+                  setFeedbackItems(clearFeedback());
+                  setMessage("Local feedback inbox cleared.");
+                }}
+              >
+                Clear Local Inbox
+              </button>
+              <div className="feedback-count">
+                <strong>{feedbackItems.length}</strong>
+                <span>saved local feedback item{feedbackItems.length === 1 ? "" : "s"}</span>
+              </div>
+            </section>
+          </div>
+        </section>
       </section>
     </main>
   );

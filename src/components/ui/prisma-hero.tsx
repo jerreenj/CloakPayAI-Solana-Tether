@@ -3,8 +3,6 @@ import { ArrowRight } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useRef } from "react";
 
-export type ProductSection = "demo" | "firewall" | "readiness" | "history" | "feedback";
-
 interface WordsPullUpProps {
   text: string;
   className?: string;
@@ -79,24 +77,18 @@ export const WordsPullUpMultiStyle = ({ segments, className = "", style }: Words
   );
 };
 
-const navItems: { label: string; value: ProductSection }[] = [
-  { label: "Demo", value: "demo" },
-  { label: "Firewall", value: "firewall" },
-  { label: "Readiness", value: "readiness" },
-  { label: "History", value: "history" },
-  { label: "Feedback", value: "feedback" }
+const navItems = [
+  { label: "Demo", href: "#demo" },
+  { label: "Firewall", href: "#firewall" },
+  { label: "Readiness", href: "#readiness" },
+  { label: "History", href: "#history" },
+  { label: "Feedback", href: "#feedback" }
 ];
 
 const heroVideo =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4";
 
-const PrismaHero = ({
-  activeSection,
-  onNavigate
-}: {
-  activeSection: ProductSection;
-  onNavigate: (section: ProductSection) => void;
-}) => {
+const PrismaHero = () => {
   return (
     <section className="prisma-hero" aria-label="CloakPay AI product intro">
       <div className="prisma-hero-frame">
@@ -107,14 +99,9 @@ const PrismaHero = ({
         <nav className="prisma-hero-nav" aria-label="Page navigation">
           <div>
             {navItems.map((item) => (
-              <button
-                key={item.value}
-                type="button"
-                className={activeSection === item.value ? "active" : ""}
-                onClick={() => onNavigate(item.value)}
-              >
+              <a key={item.href} href={item.href}>
                 {item.label}
-              </button>
+              </a>
             ))}
           </div>
         </nav>
@@ -132,12 +119,12 @@ const PrismaHero = ({
               devnet for the public preview.
             </p>
 
-            <button type="button" onClick={() => onNavigate("firewall")} className="prisma-hero-cta">
+            <a href="#firewall" className="prisma-hero-cta">
               Go to app
               <span>
                 <ArrowRight aria-hidden="true" />
               </span>
-            </button>
+            </a>
           </div>
         </div>
       </div>
