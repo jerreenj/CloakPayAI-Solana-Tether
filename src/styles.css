@@ -353,7 +353,7 @@ a {
 }
 
 .view-header {
-  align-items: end;
+  align-items: start;
   background: rgba(8, 13, 11, 0.72);
   backdrop-filter: blur(18px);
   border: 1px solid rgba(225, 224, 204, 0.13);
@@ -362,7 +362,7 @@ a {
   color: #e1e0cc;
   display: grid;
   gap: 28px;
-  grid-template-columns: minmax(0, 1fr) minmax(260px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
   margin-bottom: 24px;
   padding: clamp(22px, 3vw, 34px);
 }
@@ -378,7 +378,7 @@ a {
   color: rgba(225, 224, 204, 0.72);
   line-height: 1.45;
   margin-top: 10px;
-  max-width: 760px;
+  max-width: 680px;
 }
 
 .view-header.single-column {
@@ -450,7 +450,7 @@ h2 {
 }
 
 .status-pill {
-  align-self: end;
+  align-self: start;
   background: rgba(225, 224, 204, 0.92);
   border-radius: 12px;
   color: #0c100e;

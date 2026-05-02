@@ -31,7 +31,7 @@ declare global {
 const devnetEndpoint = "https://api.devnet.solana.com";
 const connection = new Connection(devnetEndpoint, "confirmed");
 
-const productDescription = "a local-first QVAC payment firewall for Solana payments.";
+const productDescription = "a local-first QVAC Tether payment firewall for Solana payments.";
 
 const safeInvoice = `Merchant: Frontier Labs
 Invoice: CLPAY-042
@@ -446,12 +446,11 @@ export default function App() {
           <div className="section-inner">
             <header className="view-header">
               <div>
-                <small>Demo</small>
                 <h1>Preview Command Center</h1>
-                <p>Fast path for first-time users: try the firewall, see the stack, then jump into the real devnet flow.</p>
+                <p>Try the firewall first, see the free local stack, then jump into the devnet payment flow when you are ready.</p>
               </div>
               <div className="status-pill">
-                <small>Live demo status</small>
+                <small>Live Preview Status</small>
                 <strong>{message}</strong>
               </div>
             </header>
@@ -509,7 +508,7 @@ export default function App() {
               <div>
                 <small>Firewall</small>
                 <h1>Payment Firewall</h1>
-                <p>{productDescription} Extract payment details, score invoice risk, review intent, sign on devnet, and save a privacy receipt.</p>
+                <p>Extract payment details, score invoice risk, review intent, sign on devnet, and save a privacy receipt.</p>
               </div>
               <div className="status-pill">
                 <small>Risk decision</small>
