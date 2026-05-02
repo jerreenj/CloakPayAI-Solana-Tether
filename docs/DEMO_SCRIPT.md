@@ -2,11 +2,11 @@
 
 ## Opening
 
-CloakPay AI is a local-first QVAC payment firewall for Solana payments. It checks private invoices before a wallet signs, so sensitive payment context stays local and the chain only receives the confirmed transaction.
+CloakPay AI is a local-first QVAC Tether payment firewall for Solana payments. It checks private invoices before a wallet signs, so sensitive payment context stays local and the chain only receives the confirmed transaction.
 
 ## Walkthrough
 
-1. Open the app and point out the $0 build path: local QVAC/fallback analysis, public Solana devnet RPC, browser/local storage, and no paid services.
+1. Open https://cloakpay-ai.vercel.app and point out the $0 build path: local QVAC/fallback analysis, public Solana devnet RPC, browser/local storage, and no paid services.
 2. Click **Try Without Wallet** to show that first-time users can test without setup.
 3. Run the safe sample invoice and show the extracted merchant, recipient, amount, token, and memo.
 4. Show the safe/review/block risk verdict and the evidence behind it.
@@ -24,7 +24,7 @@ The invoice stayed local. QVAC/local analysis checked the payment before signing
 
 ## Vercel Note
 
-The public Vercel page is the preview. The live QVAC OCR story is strongest in the local demo because QVAC is meant to run locally/on-device; the deployed fallback path proves the product flow without paid infrastructure.
+The public Vercel page is https://cloakpay-ai.vercel.app. The live QVAC OCR story is strongest in the local demo because QVAC is meant to run locally/on-device; the deployed fallback path proves the product flow without paid infrastructure.
 
 ## $0 Checklist
 

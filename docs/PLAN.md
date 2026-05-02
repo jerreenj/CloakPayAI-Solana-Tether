@@ -2,7 +2,7 @@
 
 ## Product
 
-CloakPay AI, a local-first QVAC payment firewall for Solana payments. The MVP focuses on Solana devnet: it analyzes invoice/payment data locally, flags risk before signing, sends a real devnet transaction, and produces a privacy receipt.
+CloakPay AI, a local-first QVAC Tether payment firewall for Solana payments. The MVP focuses on Solana devnet: it analyzes invoice/payment data locally, flags risk before signing, sends a real devnet transaction, and produces a privacy receipt.
 
 ## Core Loop
 
@@ -57,7 +57,7 @@ type PrivacyReceipt = {
 
 ## Demo Script
 
-Start with: "CloakPay AI is a local QVAC payment firewall. It checks the private invoice before the wallet signs."
+Start with: "CloakPay AI is a local-first QVAC Tether payment firewall. It checks the private invoice before the wallet signs."
 
 Then show: sample invoice -> local analysis -> risk verdict -> intent review -> wallet connect -> devnet sign/send -> privacy receipt.
 

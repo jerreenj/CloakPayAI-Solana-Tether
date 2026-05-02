@@ -3,7 +3,12 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-  "description": "CloakPay AI, a local-first QVAC payment firewall for Solana payments.",
+  "description": "CloakPay AI, a local-first QVAC Tether payment firewall for Solana payments.",
+  "homepage": "https://cloakpay-ai.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jerreenj/CloakPayAI-Solana-Tether.git"
+  },
   "scripts": {
     "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
     "dev:web": "vite --host 127.0.0.1 --port 5173",

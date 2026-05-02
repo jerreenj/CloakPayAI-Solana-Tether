@@ -1,14 +1,16 @@
 # CloakPay AI
 
-CloakPay AI, a local-first QVAC payment firewall for Solana payments.
+CloakPay AI, a local-first QVAC Tether payment firewall for Solana payments.
 
 CloakPay AI checks a Solana payment before the user signs it. It analyzes an invoice or payment screenshot locally with QVAC OCR, converts the extracted text into a payment intent, scores the risk, prepares a real Solana devnet transfer, and generates a privacy-safe receipt.
+
+Live preview: https://cloakpay-ai.vercel.app
 
 The build path is intentionally $0: no paid APIs, paid hosting, paid RPC, paid databases, paid assets, or mainnet funds.
 
 ## Winning Demo
 
-1. Open the local app.
+1. Open the live preview at https://cloakpay-ai.vercel.app or run the local app.
 2. Click **Try Without Wallet** for the fastest public preview.
 3. Run the safe sample, then the risky sample, or upload a payment screenshot.
 4. Show QVAC/local analysis extracting merchant, recipient, amount, token, and memo.
@@ -77,7 +79,7 @@ Default mode keeps a clearly labeled local fallback so the demo can be rehearsed
 
 ## Vercel
 
-The app can run on Vercel's free tier. The deployed version uses the same `/api` paths through serverless functions, and the browser has a local fallback if hosted APIs are unavailable, so the safe/risky sample demo works without a separate paid backend.
+The app is deployed at https://cloakpay-ai.vercel.app on Vercel's free tier. The deployed version uses the same `/api` paths through serverless functions, and the browser has a local fallback if hosted APIs are unavailable, so the safe/risky sample demo works without a separate paid backend.
 
 Live QVAC OCR should still be demoed locally with `QVAC_MOCK=0` when model setup is ready. The Vercel deploy is for the public product preview and fallback demo path.
 
@@ -94,6 +96,7 @@ Live QVAC OCR should still be demoed locally with `QVAC_MOCK=0` when model setup
 - Track: Tether Frontier Hackathon Track on Superteam Earn.
 - Deadline from listing: May 11, 2026.
 - Public repo: https://github.com/jerreenj/CloakPayAI-Solana-Tether
+- Live preview: https://cloakpay-ai.vercel.app
 
 ## Readiness Docs
 
