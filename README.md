@@ -1,12 +1,35 @@
-# CloakPay AI
+<p align="center">
+  <br />
+  <h1 align="center">CloakPay AI</h1>
+  <p align="center"><strong>A local-first QVAC Tether payment firewall for Solana payments.</strong></p>
+  <p align="center">
+    Check invoice risk before a wallet signs, send only on Solana devnet for the public preview, and save a privacy-safe receipt without paid services.
+  </p>
+  <p align="center">
+    <a href="https://cloakpay-ai.vercel.app"><strong>Live App</strong></a>
+    ·
+    <a href="https://github.com/jerreenj/CloakPayAI-Solana-Tether"><strong>GitHub</strong></a>
+    ·
+    <a href="docs/DEMO_SCRIPT.md"><strong>Demo Script</strong></a>
+    ·
+    <a href="docs/SUBMISSION_CHECKLIST.md"><strong>Submission Checklist</strong></a>
+  </p>
+  <p align="center">
+    <img alt="Solana" src="https://img.shields.io/badge/Solana-Devnet-14F195?style=flat-square&labelColor=111111" />
+    <img alt="QVAC" src="https://img.shields.io/badge/QVAC-Local_AI-E1E0CC?style=flat-square&labelColor=111111" />
+    <img alt="Tether" src="https://img.shields.io/badge/Tether-Track-26A17B?style=flat-square&labelColor=111111" />
+    <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&labelColor=111111" />
+    <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&labelColor=111111" />
+    <img alt="Build Cost" src="https://img.shields.io/badge/Build_Cost-%240-ffffff?style=flat-square&labelColor=111111" />
+  </p>
+  <br />
+</p>
 
-CloakPay AI, a local-first QVAC Tether payment firewall for Solana payments.
+---
 
-CloakPay AI checks a Solana payment before the user signs it. It analyzes an invoice or payment screenshot locally with QVAC OCR, converts the extracted text into a payment intent, scores the risk, prepares a real Solana devnet transfer, and generates a privacy-safe receipt.
+CloakPay AI checks a Solana payment before the user signs it. It analyzes an invoice or payment screenshot locally with QVAC OCR, converts extracted text into a payment intent, scores the risk, prepares a real Solana devnet transfer, and generates a privacy-safe receipt.
 
-Live preview: https://cloakpay-ai.vercel.app
-
-The build path is intentionally $0: no paid APIs, paid hosting, paid RPC, paid databases, paid assets, or mainnet funds.
+This is a public-preview hackathon MVP, not a mainnet payment processor. Mainnet is locked until audits, monitoring, support, and production safeguards are real.
 
 ## Submission Links
 
