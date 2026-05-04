@@ -1,4 +1,4 @@
-import { createPrivacyReceipt } from "../../server/privacy";
+import { createPrivacyReceipt } from "../../server/privacy.js";
 
 export default async function handler(request: any, response: any) {
   if (request.method !== "POST") {

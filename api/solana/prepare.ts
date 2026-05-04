@@ -1,4 +1,4 @@
-import { prepareDevnetTransfer } from "../../server/solana";
+import { prepareDevnetTransfer } from "../../server/solana.js";
 
 export default async function handler(request: any, response: any) {
   if (request.method !== "POST") {

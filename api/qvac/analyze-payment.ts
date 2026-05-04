@@ -1,4 +1,4 @@
-import { analyzePayment } from "../../server/qvac";
+import { analyzePayment } from "../../server/qvac.js";
 
 export default async function handler(request: any, response: any) {
   if (request.method !== "POST") {
