@@ -8,6 +8,14 @@ Live preview: https://cloakpay-ai.vercel.app
 
 The build path is intentionally $0: no paid APIs, paid hosting, paid RPC, paid databases, paid assets, or mainnet funds.
 
+## Submission Links
+
+- Live preview: https://cloakpay-ai.vercel.app
+- Public repo: https://github.com/jerreenj/CloakPayAI-Solana-Tether
+- Demo script: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
+- Submission checklist: [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md)
+- QVAC proof plan: [docs/QVAC_PROOF.md](docs/QVAC_PROOF.md)
+
 ## Winning Demo
 
 1. Open the live preview at https://cloakpay-ai.vercel.app or run the local app.
@@ -105,3 +113,4 @@ Live QVAC OCR should still be demoed locally with `QVAC_MOCK=0` when model setup
 - [Mainnet readiness](docs/MAINNET_READINESS.md)
 - [QVAC proof plan](docs/QVAC_PROOF.md)
 - [Demo script](docs/DEMO_SCRIPT.md)
+- [Submission checklist](docs/SUBMISSION_CHECKLIST.md)
