@@ -57,6 +57,17 @@ CloakPay AI turns the moment before signing into a safety checkpoint:
 - Sends only on Solana devnet for the public preview.
 - Saves privacy-safe receipts locally for user proof without sending invoice content to a database.
 
+## Hackathon Fit
+
+CloakPay AI is built for the Tether Frontier QVAC side track: local AI is not decoration here, it is the core payment firewall. The product uses QVAC/local analysis to keep invoice content private until the user chooses what to sign.
+
+| Criterion | CloakPay AI answer |
+| --- | --- |
+| Technical QVAC depth | OCR/payment extraction sits directly inside the main payment flow |
+| Product value | Prevents users from blindly signing suspicious invoices or wrong payment details |
+| Innovation | Local-first AI protects payment context before any blockchain action happens |
+| Demo quality | Safe sample, risky sample, walletless preview, devnet signing, and receipt proof |
+
 ## Submission Links
 
 - Live preview: https://cloakpay-ai.vercel.app
