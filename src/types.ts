@@ -80,6 +80,7 @@ export type PreparedTransaction = {
 export type LocalHistoryItem = {
   id: string;
   createdAt: string;
+  network?: NetworkCluster;
   merchant: string;
   amount: number;
   token: PaymentIntent["token"];

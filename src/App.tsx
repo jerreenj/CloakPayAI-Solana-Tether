@@ -1,17 +1,33 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { useEffect, useMemo, useState } from "react";
 import { PrismaHero } from "./components/ui/prisma-hero";
-import { clearFeedback, loadFeedback, loadHistory, saveFeedbackItem, saveHistoryItem, updateHistoryItem } from "./localStore";
+import {
+  clearFeedback,
+  clearMonitorEvents,
+  clearProfile,
+  loadFeedback,
+  loadHistory,
+  loadMonitorEvents,
+  loadProfile,
+  saveFeedbackItem,
+  saveHistoryItem,
+  saveMonitorEvent,
+  saveProfile,
+  updateHistoryItem
+} from "./localStore";
 import { analyzeLocally, createLocalReceipt } from "./localAnalysis";
 import type {
   AnalysisResponse,
   FeedbackCategory,
   FeedbackItem,
   LocalHistoryItem,
+  MonitorEvent,
+  NetworkCluster,
   PaymentIntent,
   PreparedTransaction,
   PrivacyReceipt,
-  QvacStatus
+  QvacStatus,
+  UserProfile
 } from "./types";
 
 type SolanaProvider = {
@@ -28,8 +44,15 @@ declare global {
   }
 }
 
-const devnetEndpoint = "https://api.devnet.solana.com";
-const connection = new Connection(devnetEndpoint, "confirmed");
+const networkEndpoints: Record<NetworkCluster, string> = {
+  devnet: "https://api.devnet.solana.com",
+  "mainnet-beta": "https://api.mainnet-beta.solana.com"
+};
+
+const networkLabels: Record<NetworkCluster, string> = {
+  devnet: "Devnet",
+  "mainnet-beta": "Mainnet-Beta"
+};
 
 const productDescription = "a local-first QVAC Tether payment firewall for Solana payments.";
 
@@ -48,6 +71,15 @@ Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase
 
 const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
 const faucetUrl = "https://faucet.solana.com/";
+const supportEmail = "mailto:jerreen08@gmail.com?subject=CloakPay%20AI%20Support";
+
+function getConnection(network: NetworkCluster) {
+  return new Connection(networkEndpoints[network], "confirmed");
+}
+
+function explorerTxUrl(signature: string, network: NetworkCluster) {
+  return `https://explorer.solana.com/tx/${signature}${network === "devnet" ? "?cluster=devnet" : ""}`;
+}
 
 function bytesFromBase64(value: string) {
   const binary = window.atob(value);
@@ -117,6 +149,12 @@ export default function App() {
   const [history, setHistory] = useState<LocalHistoryItem[]>(() => loadHistory());
   const [currentHistoryId, setCurrentHistoryId] = useState("");
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>(() => loadFeedback());
+  const [profile, setProfile] = useState<UserProfile | null>(() => loadProfile());
+  const [monitorEvents, setMonitorEvents] = useState<MonitorEvent[]>(() => loadMonitorEvents());
+  const [accountName, setAccountName] = useState(() => loadProfile()?.name ?? "Preview Operator");
+  const [accountEmail, setAccountEmail] = useState(() => loadProfile()?.email ?? "");
+  const [network, setNetwork] = useState<NetworkCluster>("devnet");
+  const [mainnetAcknowledged, setMainnetAcknowledged] = useState(false);
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>("bug");
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackEmail, setFeedbackEmail] = useState("");
@@ -144,25 +182,44 @@ export default function App() {
   }, []);
 
   const riskClass = analysis?.riskReport.verdict ?? "pending";
-  const canSend = Boolean(intent && walletAddress && prepared && analysis?.riskReport.verdict !== "block");
+  const canSend = Boolean(
+    intent &&
+      walletAddress &&
+      prepared &&
+      analysis?.riskReport.verdict !== "block" &&
+      (prepared.network !== "mainnet-beta" || mainnetAcknowledged)
+  );
+
+  function logEvent(level: MonitorEvent["level"], area: MonitorEvent["area"], eventMessage: string) {
+    setMonitorEvents(
+      saveMonitorEvent({
+        id: createId(),
+        createdAt: new Date().toISOString(),
+        level,
+        area,
+        message: eventMessage,
+        network
+      })
+    );
+  }
 
   const stackStatus = useMemo(
     () => [
       ["AI", qvacStatus?.mode === "live-qvac" ? "Live local QVAC" : "Free fallback demo"],
-      ["RPC", "Public Solana devnet"],
-      ["Storage", "Browser/local only"],
-      ["Build Cost", "$0"]
+      ["RPC", `${networkLabels[network]} public RPC`],
+      ["Account", profile ? profile.name : "Local preview profile"],
+      ["Support", "Email + GitHub + export"]
     ],
-    [qvacStatus]
+    [network, profile, qvacStatus]
   );
 
   const productionReadiness = useMemo(
     () => [
-      ["Mainnet payments", "Locked until audit, monitoring, rollback, and support are complete."],
-      ["Payment reliability", "Devnet path is live; mainnet needs retries, idempotency, and incident drills."],
-      ["Security review", "Internal guardrails are documented; external audit is still required."],
-      ["Accounts/history", "Free local profile and history are enabled in this browser."],
-      ["Monitoring/support", "Free Vercel/GitHub signals plus local feedback export for preview users."],
+      ["Mainnet payments", "Enabled for SOL transfer preparation with explicit user confirmation before real funds move."],
+      ["Payment reliability", "Devnet and mainnet transaction builders use public Solana RPC with wallet-side signing."],
+      ["Security review", "Mainnet includes user confirmation gates; independent audit remains your responsibility before scale."],
+      ["Accounts/history", "Wallet-linked local profile, activity history, and exportable receipts are enabled."],
+      ["Monitoring/support", "Health endpoint, local event log, email support, GitHub issues, and exportable feedback are enabled."],
       [
         "QVAC proof",
         qvacStatus?.mode === "live-qvac"
@@ -209,9 +266,10 @@ export default function App() {
     setCurrentHistoryId(id);
     setHistory(
       saveHistoryItem({
-        id,
-        createdAt: new Date().toISOString(),
-        merchant: data.intent.merchant,
+      id,
+      createdAt: new Date().toISOString(),
+      network,
+      merchant: data.intent.merchant,
         amount: data.intent.amount,
         token: data.intent.token,
         verdict: data.riskReport.verdict,
@@ -221,6 +279,7 @@ export default function App() {
         txSignature: nextReceipt?.txSignature
       })
     );
+    logEvent("info", "analysis", `Analysis finished with ${data.riskReport.verdict} verdict.`);
   }
 
   function rememberReceipt(nextReceipt: PrivacyReceipt, signature = txSignature) {
@@ -231,6 +290,22 @@ export default function App() {
         txSignature: signature || nextReceipt.txSignature
       })
     );
+    logEvent("info", "receipt", "Privacy receipt created and stored locally.");
+  }
+
+  function saveAccount() {
+    const now = new Date().toISOString();
+    const nextProfile = saveProfile({
+      id: profile?.id ?? createId(),
+      name: accountName.trim() || "Preview Operator",
+      email: accountEmail.trim() || undefined,
+      walletAddress: walletAddress || profile?.walletAddress,
+      createdAt: profile?.createdAt ?? now,
+      updatedAt: now
+    });
+    setProfile(nextProfile);
+    logEvent("info", "system", "Local account profile saved.");
+    setMessage("Local account saved. It stays in this browser unless exported.");
   }
 
   function submitLocalFeedback() {
@@ -248,6 +323,7 @@ export default function App() {
     };
     setFeedbackItems(saveFeedbackItem(item));
     setFeedbackText("");
+    logEvent("info", "support", `Feedback saved locally: ${feedbackCategory}.`);
     setMessage("Feedback saved locally. Export it or open a GitHub issue when ready.");
   }
 
@@ -323,28 +399,47 @@ export default function App() {
       return;
     }
     const result = await provider.connect();
-    setWalletAddress(result.publicKey.toBase58());
-    setMessage("Wallet connected on devnet flow.");
+    const address = result.publicKey.toBase58();
+    setWalletAddress(address);
+    const now = new Date().toISOString();
+    const nextProfile = saveProfile({
+      id: profile?.id ?? createId(),
+      name: profile?.name ?? (accountName.trim() || "Wallet Operator"),
+      email: profile?.email ?? (accountEmail.trim() || undefined),
+      walletAddress: address,
+      createdAt: profile?.createdAt ?? now,
+      updatedAt: now
+    });
+    setProfile(nextProfile);
+    logEvent("info", "wallet", `Wallet connected for ${networkLabels[network]}.`);
+    setMessage(`Wallet connected for ${networkLabels[network]} flow.`);
   }
 
   async function prepareTransaction() {
     if (!intent || !walletAddress) return;
+    if (network === "mainnet-beta" && !mainnetAcknowledged) {
+      setMessage("Confirm the mainnet real-funds warning before preparing a mainnet transaction.");
+      logEvent("warn", "wallet", "Mainnet prepare blocked until explicit confirmation.");
+      return;
+    }
     setBusy(true);
-    setMessage("Preparing free public-devnet transaction...");
+    setMessage(`Preparing ${networkLabels[network]} transaction...`);
     try {
       const response = await fetch("/api/solana/prepare", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ intent, payer: walletAddress })
+        body: JSON.stringify({ intent, payer: walletAddress, network })
       });
       if (!response.ok) throw new Error(await response.text());
       setPrepared((await response.json()) as PreparedTransaction);
       setMessage("Transaction prepared. Nothing has been signed yet.");
+      logEvent("info", "wallet", `${networkLabels[network]} transaction prepared.`);
     } catch (error) {
       try {
         if (intent.token === "USDT") {
-          throw new Error("USDT is tracked in the payment intent, but the $0 public preview only sends devnet SOL.");
+          throw new Error("USDT is tracked in the payment intent, but CloakPay currently prepares SOL transfers only.");
         }
+        const connection = getConnection(network);
         const fallbackKey = "11111111111111111111111111111111";
         const fromPubkey = toPublicKey(walletAddress, fallbackKey);
         const toPubkey = toPublicKey(intent.recipientAddress, fallbackKey);
@@ -354,17 +449,19 @@ export default function App() {
           SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
         );
         setPrepared({
-          network: "devnet",
+          network,
           from: fromPubkey.toBase58(),
           to: toPubkey.toBase58(),
           lamports,
           recentBlockhash: transaction.recentBlockhash ?? blockhash,
           serializedTransaction: window.btoa(String.fromCharCode(...transaction.serialize({ requireAllSignatures: false }))),
-          explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}?cluster=devnet`
+          explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${network === "devnet" ? "?cluster=devnet" : ""}`
         });
-        setMessage("Hosted API unavailable, so the devnet transaction was prepared in your browser.");
+        logEvent("warn", "wallet", "Hosted API unavailable; transaction prepared in browser fallback.");
+        setMessage("Hosted API unavailable, so the transaction was prepared in your browser.");
       } catch (fallbackError) {
         setMessage(fallbackError instanceof Error ? fallbackError.message : "Could not prepare transaction.");
+        logEvent("error", "wallet", fallbackError instanceof Error ? fallbackError.message : "Could not prepare transaction.");
       }
     } finally {
       setBusy(false);
@@ -384,19 +481,23 @@ export default function App() {
         signature = (await provider.signAndSendTransaction(transaction)).signature;
       } else if (provider.signTransaction) {
         const signed = await provider.signTransaction(transaction);
+        const connection = getConnection(prepared.network);
         signature = await connection.sendRawTransaction(signed.serialize());
       } else {
         throw new Error("Wallet does not support transaction signing.");
       }
 
+      const connection = getConnection(prepared.network);
       await connection.confirmTransaction(signature, "confirmed");
       setTxSignature(signature);
       if (currentHistoryId) {
         setHistory(updateHistoryItem(currentHistoryId, { txSignature: signature }));
       }
-      setMessage("Devnet payment sent.");
+      logEvent("info", "wallet", `${networkLabels[prepared.network]} payment sent.`);
+      setMessage(`${networkLabels[prepared.network]} payment sent.`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Signing failed.");
+      logEvent("error", "wallet", error instanceof Error ? error.message : "Signing failed.");
     } finally {
       setBusy(false);
     }
@@ -483,9 +584,19 @@ export default function App() {
                 </button>
               </div>
               <div>
+                <small>User account</small>
+                <strong>{profile ? profile.name : "Create local profile"}</strong>
+                <p>Save a free wallet-linked operator profile, then export account history before submission or user testing.</p>
+                <input value={accountName} onChange={(event) => setAccountName(event.target.value)} placeholder="Name" />
+                <input value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="Email or support contact" />
+                <button type="button" onClick={saveAccount}>
+                  Save Account
+                </button>
+              </div>
+              <div>
                 <small>Wallet testers</small>
                 <strong>Use devnet only.</strong>
-                <p>No mainnet, no real funds, no paid RPC. Get faucet SOL, connect wallet, then sign a devnet transfer.</p>
+                <p>Use devnet for public testing. Mainnet is available only after confirming the real-funds warning.</p>
                 <a href={faucetUrl} target="_blank" rel="noreferrer">
                   Get Devnet SOL
                 </a>
@@ -494,9 +605,14 @@ export default function App() {
                 <small>Feedback</small>
                 <strong>Help shape the real product.</strong>
                 <p>Send bugs, confusing screens, wallet issues, or invoice cases we should support next.</p>
-                <a href={feedbackUrl} target="_blank" rel="noreferrer">
-                  Leave Feedback
-                </a>
+                <div className="mini-actions">
+                  <a href={feedbackUrl} target="_blank" rel="noreferrer">
+                    GitHub Issue
+                  </a>
+                  <a href={supportEmail}>
+                    Email Support
+                  </a>
+                </div>
               </div>
             </section>
           </div>
@@ -649,11 +765,38 @@ export default function App() {
               <section className="panel wallet-panel">
                 <div className="panel-header">
                   <span>5</span>
-                  <h2>Sign On Devnet</h2>
+                  <h2>Sign Payment</h2>
                 </div>
                 <div className="safety-banner">
-                  Devnet preview only. Mainnet payments are disabled until audits, production monitoring, and user safeguards are ready.
+                  Mainnet is enabled for SOL transfers only. Mainnet uses real funds and must be tested carefully before sharing with users.
                 </div>
+                <label className="network-control">
+                  Network
+                  <select
+                    value={network}
+                    onChange={(event) => {
+                      const nextNetwork = event.target.value as NetworkCluster;
+                      setNetwork(nextNetwork);
+                      setPrepared(null);
+                      setTxSignature("");
+                      setMainnetAcknowledged(false);
+                      logEvent("info", "wallet", `Network switched to ${networkLabels[nextNetwork]}.`);
+                    }}
+                  >
+                    <option value="devnet">Devnet</option>
+                    <option value="mainnet-beta">Mainnet-Beta</option>
+                  </select>
+                </label>
+                {network === "mainnet-beta" && (
+                  <label className="mainnet-check">
+                    <input
+                      type="checkbox"
+                      checked={mainnetAcknowledged}
+                      onChange={(event) => setMainnetAcknowledged(event.target.checked)}
+                    />
+                    I understand this prepares a real mainnet SOL transaction with real funds.
+                  </label>
+                )}
                 <div className="receipt-block">
                   <small>Wallet</small>
                   <strong>{formatAddress(walletAddress)}</strong>
@@ -661,8 +804,17 @@ export default function App() {
                 <button disabled={busy || Boolean(walletAddress)} onClick={connectWallet}>
                   Connect Wallet
                 </button>
-                <button disabled={busy || !intent || !walletAddress || analysis?.riskReport.verdict === "block"} onClick={prepareTransaction}>
-                  Prepare Devnet SOL
+                <button
+                  disabled={
+                    busy ||
+                    !intent ||
+                    !walletAddress ||
+                    analysis?.riskReport.verdict === "block" ||
+                    (network === "mainnet-beta" && !mainnetAcknowledged)
+                  }
+                  onClick={prepareTransaction}
+                >
+                  Prepare {networkLabels[network]} SOL
                 </button>
                 <button disabled={busy || !canSend} onClick={signAndSend}>
                   Sign And Send
@@ -673,9 +825,9 @@ export default function App() {
                     <p>{prepared.lamports} lamports to {formatAddress(prepared.to)}</p>
                   </div>
                 )}
-                {txSignature && (
-                  <a href={`https://explorer.solana.com/tx/${txSignature}?cluster=devnet`} target="_blank" rel="noreferrer">
-                    View devnet transaction
+                {txSignature && prepared && (
+                  <a href={explorerTxUrl(txSignature, prepared.network)} target="_blank" rel="noreferrer">
+                    View {networkLabels[prepared.network]} transaction
                   </a>
                 )}
               </section>
@@ -726,18 +878,18 @@ export default function App() {
               <div>
                 <small>Readiness</small>
                 <h1>Production Readiness</h1>
-                <p>What is real today, what is locked for mainnet, and what must be true before real-money payments.</p>
+                <p>Mainnet support, wallet accounts, monitoring, support, and exportable user history are now inside the product.</p>
               </div>
               <div className="status-pill">
                 <small>Mainnet</small>
-                <strong>Locked until company-grade controls are real.</strong>
+                <strong>Enabled with explicit real-funds confirmation.</strong>
               </div>
             </header>
 
             <section className="readiness-board" aria-label="Production readiness">
               <div className="section-heading">
                 <small>Production path</small>
-                <h2>Mainnet stays locked until the company-grade controls are real.</h2>
+                <h2>Mainnet is available, but the product still forces user confirmation before real SOL can move.</h2>
               </div>
               <div className="readiness-grid">
                 {productionReadiness.map(([label, value]) => (
@@ -767,7 +919,7 @@ export default function App() {
                 <h2>Local User History</h2>
               </div>
               <p className="muted">
-                A free preview account lives in this browser only. No database, no paid storage, and no cloud profile is created.
+                Account: {profile?.name ?? "Not saved"} {profile?.walletAddress ? `· ${formatAddress(profile.walletAddress)}` : ""}. This profile lives in this browser unless exported.
               </p>
               <div className="history-list">
                 {history.map((item) => (
@@ -775,7 +927,7 @@ export default function App() {
                     <div>
                       <strong>{item.merchant}</strong>
                       <p>
-                        {item.amount} {item.token} · {verdictLabel(item.verdict)} · {item.score}/100
+                        {item.amount} {item.token} · {item.network ? networkLabels[item.network] : "Devnet"} · {verdictLabel(item.verdict)} · {item.score}/100
                       </p>
                     </div>
                     <small>{new Date(item.createdAt).toLocaleString()}</small>
@@ -787,6 +939,20 @@ export default function App() {
               </div>
               <button type="button" disabled={!history.length} onClick={() => downloadJson("cloakpay-history.json", history)}>
                 Export History
+              </button>
+              <button type="button" disabled={!profile} onClick={() => downloadJson("cloakpay-account.json", profile)}>
+                Export Account
+              </button>
+              <button
+                type="button"
+                disabled={!profile}
+                onClick={() => {
+                  setProfile(clearProfile());
+                  logEvent("warn", "system", "Local account profile cleared.");
+                  setMessage("Local account profile cleared.");
+                }}
+              >
+                Clear Account
               </button>
             </section>
           </div>
@@ -841,6 +1007,9 @@ export default function App() {
               <a href={feedbackIssueUrl} target="_blank" rel="noreferrer">
                 Open GitHub Issue
               </a>
+              <a href={supportEmail}>
+                Email Support
+              </a>
               <button
                 type="button"
                 disabled={!feedbackItems.length}
@@ -854,6 +1023,38 @@ export default function App() {
               <div className="feedback-count">
                 <strong>{feedbackItems.length}</strong>
                 <span>Saved Local Feedback Item{feedbackItems.length === 1 ? "" : "s"}</span>
+              </div>
+              <div className="monitor-log">
+                <div className="panel-header">
+                  <span>9</span>
+                  <h2>Production Monitor</h2>
+                </div>
+                <p className="muted">Local event trail for analysis, wallet, receipt, support, and system events.</p>
+                <div className="history-list">
+                  {monitorEvents.map((item) => (
+                    <div key={item.id} className={`history-item monitor-${item.level}`}>
+                      <strong>{item.area.toUpperCase()} · {item.level.toUpperCase()}</strong>
+                      <p>{item.message}</p>
+                      <small>{new Date(item.createdAt).toLocaleString()} · {item.network ? networkLabels[item.network] : "No network"}</small>
+                    </div>
+                  ))}
+                  {!monitorEvents.length && <p className="muted">Run the product flow to generate monitor events.</p>}
+                </div>
+                <div className="button-row">
+                  <button type="button" disabled={!monitorEvents.length} onClick={() => downloadJson("cloakpay-monitor-events.json", monitorEvents)}>
+                    Export Monitor
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!monitorEvents.length}
+                    onClick={() => {
+                      setMonitorEvents(clearMonitorEvents());
+                      setMessage("Local monitor log cleared.");
+                    }}
+                  >
+                    Clear Monitor
+                  </button>
+                </div>
               </div>
             </section>
           </div>

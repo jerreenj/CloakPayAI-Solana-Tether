@@ -507,7 +507,7 @@ small {
 .user-guide {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: 14px;
 }
 
@@ -530,6 +530,16 @@ small {
 .user-guide button,
 .user-guide a {
   margin-top: 4px;
+}
+
+.user-guide input {
+  min-height: 42px;
+}
+
+.mini-actions {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr;
 }
 
 .readiness-board {
@@ -874,6 +884,35 @@ code {
   text-transform: uppercase;
 }
 
+.network-control {
+  color: rgba(225, 224, 204, 0.62);
+  display: grid;
+  font-size: 0.78rem;
+  font-weight: 850;
+  gap: 6px;
+  text-transform: uppercase;
+}
+
+.mainnet-check {
+  align-items: center;
+  background: rgba(255, 101, 87, 0.16);
+  border: 1px solid rgba(255, 101, 87, 0.34);
+  border-radius: 12px;
+  color: #ffd6d1;
+  display: flex;
+  font-size: 0.9rem;
+  font-weight: 850;
+  gap: 10px;
+  line-height: 1.35;
+  padding: 12px;
+}
+
+.mainnet-check input {
+  flex: 0 0 auto;
+  min-height: auto;
+  width: auto;
+}
+
 .feedback-count {
   align-items: center;
   background: rgba(8, 13, 11, 0.76);
@@ -900,6 +939,20 @@ code {
   font-weight: 750;
 }
 
+.monitor-log {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.monitor-warn {
+  border-color: rgba(242, 183, 5, 0.3);
+}
+
+.monitor-error {
+  border-color: rgba(255, 101, 87, 0.34);
+}
+
 .single-community {
   grid-template-columns: minmax(0, 760px);
   justify-content: center;
@@ -924,11 +977,8 @@ code {
     grid-template-columns: 1fr;
   }
 
-  .user-guide {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .readiness-grid,
+  .user-guide,
   .community-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
