@@ -1,7 +1,7 @@
 import express from "express";
 import { createPrivacyReceipt } from "./privacy";
 import { analyzePayment, getQvacStatus } from "./qvac";
-import { prepareDevnetTransfer } from "./solana";
+import { prepareTransfer } from "./solana";
 
 const app = express();
 const port = Number(process.env.PORT ?? 8787);
@@ -9,7 +9,13 @@ const port = Number(process.env.PORT ?? 8787);
 app.use(express.json({ limit: "12mb" }));
 
 app.get("/api/health", (_request, response) => {
-  response.json({ ok: true, service: "cloakpay-ai" });
+  response.json({
+    ok: true,
+    service: "cloakpay-ai",
+    networks: ["devnet", "mainnet-beta"],
+    mainnetEnabled: true,
+    paidServices: false
+  });
 });
 
 app.get("/api/qvac/status", (_request, response) => {
@@ -39,7 +45,7 @@ app.post("/api/privacy/receipt", async (request, response) => {
 
 app.post("/api/solana/prepare", async (request, response) => {
   try {
-    response.json(await prepareDevnetTransfer(request.body));
+    response.json(await prepareTransfer(request.body));
   } catch (error) {
     response.status(500).send(error instanceof Error ? error.message : "Transaction preparation failed.");
   }

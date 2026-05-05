@@ -22,6 +22,8 @@ export type PaymentIntent = {
   warnings: string[];
 };
 
+export type NetworkCluster = "devnet" | "mainnet-beta";
+
 export type RiskReport = {
   score: number;
   verdict: "safe" | "review" | "block";

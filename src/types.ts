@@ -22,6 +22,8 @@ export type PaymentIntent = {
   warnings: string[];
 };
 
+export type NetworkCluster = "devnet" | "mainnet-beta";
+
 export type RiskReport = {
   score: number;
   verdict: "safe" | "review" | "block";
@@ -66,7 +68,7 @@ export type QvacStatus = {
 };
 
 export type PreparedTransaction = {
-  network: "devnet";
+  network: NetworkCluster;
   from: string;
   to: string;
   lamports: number;
@@ -96,4 +98,22 @@ export type FeedbackItem = {
   category: FeedbackCategory;
   message: string;
   email?: string;
+};
+
+export type UserProfile = {
+  id: string;
+  name: string;
+  email?: string;
+  walletAddress?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MonitorEvent = {
+  id: string;
+  createdAt: string;
+  level: "info" | "warn" | "error";
+  area: "analysis" | "wallet" | "receipt" | "support" | "system";
+  message: string;
+  network?: NetworkCluster;
 };
