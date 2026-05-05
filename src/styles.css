@@ -14,6 +14,7 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 16px;
+  scrollbar-color: rgba(239, 233, 210, 0.38) #090d0b;
 }
 
 body {
@@ -293,6 +294,7 @@ a:hover {
   overflow: visible;
   padding: 0;
   position: relative;
+  scroll-snap-type: y proximity;
 }
 
 .workspace {
@@ -322,6 +324,25 @@ a:hover {
   top: 0;
   transform: translateX(-50%);
   width: min(92vw, 1180px);
+}
+
+.app-section::after {
+  background: linear-gradient(90deg, transparent, rgba(158, 230, 189, 0.045), transparent);
+  content: "";
+  height: 36%;
+  left: 0;
+  opacity: 0.8;
+  pointer-events: none;
+  position: absolute;
+  right: 0;
+  top: 18%;
+  transform: skewY(-4deg);
+  z-index: 0;
+}
+
+.section-inner {
+  position: relative;
+  z-index: 1;
 }
 
 .section-inner {
@@ -996,6 +1017,58 @@ code {
   justify-content: center;
 }
 
+@supports (animation-timeline: view()) {
+  .app-section > .section-inner {
+    animation: section-lift both ease-out;
+    animation-range: entry 0% cover 28%;
+    animation-timeline: view();
+  }
+
+  .app-section::after {
+    animation: section-depth both linear;
+    animation-range: entry 0% exit 100%;
+    animation-timeline: view();
+  }
+}
+
+@keyframes section-lift {
+  from {
+    opacity: 0.74;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes section-depth {
+  from {
+    transform: translateY(34px) skewY(-4deg);
+  }
+
+  to {
+    transform: translateY(-34px) skewY(-4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .app-shell {
+    background-attachment: scroll;
+    scroll-snap-type: none;
+  }
+}
+
 @media (max-width: 1120px) {
   .prisma-hero-content {
     grid-template-columns: 1fr;
@@ -1105,7 +1178,9 @@ code {
   }
 
   .app-shell {
+    background-attachment: scroll;
     padding: 0;
+    scroll-snap-type: none;
   }
 
   .workspace {
