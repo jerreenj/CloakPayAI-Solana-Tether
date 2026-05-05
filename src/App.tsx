@@ -547,11 +547,12 @@ export default function App() {
           <div className="section-inner">
             <header className="view-header">
               <div>
-                <h1>Preview Command Center</h1>
-                <p>Try the firewall first, see the free local stack, then jump into the devnet payment flow when you are ready.</p>
+                <small>Product preview</small>
+                <h1>Start Here</h1>
+                <p>No wallet needed for the first run. Load a sample invoice, see the risk decision, then connect a wallet only when the payment looks right.</p>
               </div>
               <div className="status-pill">
-                <small>Live Preview Status</small>
+                <small>Current Status</small>
                 <strong>{message}</strong>
               </div>
             </header>
@@ -578,7 +579,7 @@ export default function App() {
               <div>
                 <small>Start here</small>
                 <strong>Try the firewall before connecting a wallet.</strong>
-                <p>Run a safe or risky sample to see how CloakPay catches payment risk before signing.</p>
+                <p>Use this first. It creates an analysis and receipt locally so a new user understands the flow immediately.</p>
                 <button type="button" disabled={busy} onClick={tryWithoutWallet}>
                   Try Without Wallet
                 </button>
@@ -596,7 +597,7 @@ export default function App() {
               <div>
                 <small>Wallet testers</small>
                 <strong>Start on devnet, switch when ready.</strong>
-                <p>Use devnet for public testing. Mainnet is available only after confirming the real-funds warning.</p>
+                <p>Use devnet for public testing. Mainnet is available only after the real-funds warning is confirmed.</p>
                 <a href={faucetUrl} target="_blank" rel="noreferrer">
                   Get Devnet SOL
                 </a>
@@ -604,7 +605,7 @@ export default function App() {
               <div>
                 <small>Feedback</small>
                 <strong>Help shape the real product.</strong>
-                <p>Send bugs, confusing screens, wallet issues, or invoice cases we should support next.</p>
+                <p>Send bugs, wallet issues, confusing screens, or invoice cases we should support next.</p>
                 <div className="mini-actions">
                   <a href={feedbackUrl} target="_blank" rel="noreferrer">
                     GitHub Issue
@@ -623,11 +624,11 @@ export default function App() {
             <header className="view-header">
               <div>
                 <small>Firewall</small>
-                <h1>Payment Firewall</h1>
-                <p>Extract payment details, score invoice risk, review intent, sign on devnet, and save a privacy receipt.</p>
+                <h1>Payment Check</h1>
+                <p>Extract the payment details, score invoice risk, review the intent, sign only when it is clear, then save a privacy receipt.</p>
               </div>
               <div className="status-pill">
-                <small>Risk decision</small>
+                <small>Decision</small>
                 <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
               </div>
             </header>
@@ -877,8 +878,8 @@ export default function App() {
             <header className="view-header">
               <div>
                 <small>Readiness</small>
-                <h1>Production Readiness</h1>
-                <p>Mainnet support, wallet accounts, monitoring, support, and exportable user history are now inside the product.</p>
+                <h1>Operations</h1>
+                <p>Mainnet mode, wallet accounts, monitor logs, support paths, and exportable user history are available in the product.</p>
               </div>
               <div className="status-pill">
                 <small>Mainnet</small>
@@ -908,8 +909,8 @@ export default function App() {
             <header className="view-header single-column">
               <div>
                 <small>History</small>
-                <h1>Local User History</h1>
-                <p>A free browser-only activity trail for analyses, receipts, and devnet transaction proof.</p>
+                <h1>History</h1>
+                <p>Browser-only records for analyses, receipts, account details, and transaction proof.</p>
               </div>
             </header>
 
@@ -963,8 +964,8 @@ export default function App() {
             <header className="view-header single-column">
               <div>
                 <small>Feedback</small>
-                <h1>Feedback Loop</h1>
-                <p>Capture user issues, wallet friction, invoice formats, and mainnet asks without adding a paid backend.</p>
+                <h1>Support</h1>
+                <p>Capture user issues, wallet friction, invoice formats, and mainnet requests without adding a paid backend.</p>
               </div>
             </header>
 

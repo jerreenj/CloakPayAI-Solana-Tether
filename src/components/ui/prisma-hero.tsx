@@ -115,8 +115,8 @@ const PrismaHero = () => {
 
           <div className="prisma-hero-side">
             <p>
-              A local-first QVAC Tether payment firewall for Solana payments. Check invoice risk before a wallet signs, then send
-              only on devnet for the public preview.
+              A local-first QVAC Tether payment firewall for Solana payments. Check invoice risk before a wallet signs, then
+              choose devnet or mainnet-beta SOL mode when the intent is clear.
             </p>
 
             <a href="#firewall" className="prisma-hero-cta">
