@@ -13,6 +13,7 @@
     "@replit/vite-plugin-cartographer": "catalog:",
     "@replit/vite-plugin-dev-banner": "catalog:",
     "@replit/vite-plugin-runtime-error-modal": "catalog:",
+    "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.0",
     "@tailwindcss/vite": "catalog:",
     "@types/node": "catalog:",

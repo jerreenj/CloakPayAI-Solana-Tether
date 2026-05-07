@@ -69,8 +69,13 @@ export type QvacStatus = {
 
 export type PreparedTransaction = {
   network: NetworkCluster;
+  token?: "SOL" | "USDT";
   from: string;
   to: string;
+  fromATA?: string;
+  toATA?: string;
+  mintAddress?: string;
+  usdtAmount?: number;
   lamports: number;
   recentBlockhash: string;
   serializedTransaction: string;

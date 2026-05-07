@@ -1,4 +1,11 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import {
+  createAssociatedTokenAccountInstruction,
+  createTransferCheckedInstruction,
+  getAssociatedTokenAddressSync,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID
+} from "@solana/spl-token";
 import { useEffect, useMemo, useState } from "react";
 import { PrismaHero } from "./components/ui/prisma-hero";
 import {
@@ -61,11 +68,23 @@ Recipient: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
 Memo: QVAC local payment firewall demo
 Note: Pay after local verification only`;
 
+const usdtInvoice = `Merchant: Tether Frontier Payments
+Invoice: USDT-001
+Amount: 10.00 USDT
+Token: USDT
+Recipient: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
+Memo: Hackathon prize settlement — QVAC verified
+Note: Tether USDT transfer on Solana`;
+
 const suspiciousInvoice = `Merchant: Unknown Airdrop Desk
 Invoice: CLAIM-NOW
 Amount: pending
 Memo: urgent wallet verification
 Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase.`;
+
+const USDT_DECIMALS = 6;
+const USDT_MINT_DEVNET = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
+const USDT_MINT_MAINNET = new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
 
 const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
 const faucetUrl = "https://faucet.solana.com/";
@@ -440,29 +459,59 @@ export default function App() {
       logEvent("info", "wallet", `${networkLabels[network]} transaction prepared.`);
     } catch {
       try {
-        if (intent.token === "USDT") {
-          throw new Error("USDT is tracked in the payment intent, but CloakPay currently prepares SOL transfers only.");
-        }
         const connection = getConnection(network);
         const fallbackKey = "11111111111111111111111111111111";
         const fromPubkey = toPublicKey(walletAddress, fallbackKey);
         const toPubkey = toPublicKey(intent.recipientAddress, fallbackKey);
-        const lamports = Math.max(1, Math.round(intent.amount * LAMPORTS_PER_SOL));
         const { blockhash } = await connection.getLatestBlockhash("confirmed");
-        const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash }).add(
-          SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
-        );
-        setPrepared({
-          network,
-          from: fromPubkey.toBase58(),
-          to: toPubkey.toBase58(),
-          lamports,
-          recentBlockhash: transaction.recentBlockhash ?? blockhash,
-          serializedTransaction: window.btoa(String.fromCharCode(...transaction.serialize({ requireAllSignatures: false }))),
-          explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${network === "devnet" ? "?cluster=devnet" : ""}`
-        });
-        logEvent("warn", "wallet", "Hosted API unavailable; transaction prepared in browser fallback.");
-        setMessage("Hosted API unavailable, so the transaction was prepared in your browser.");
+        const cluster = network === "devnet" ? "?cluster=devnet" : "";
+
+        if (intent.token === "USDT") {
+          const mint = network === "mainnet-beta" ? USDT_MINT_MAINNET : USDT_MINT_DEVNET;
+          const usdtRaw = BigInt(Math.round(intent.amount * 10 ** USDT_DECIMALS));
+          const fromATA = getAssociatedTokenAddressSync(mint, fromPubkey, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+          const toATA = getAssociatedTokenAddressSync(mint, toPubkey, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+          const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash });
+          transaction.add(
+            createAssociatedTokenAccountInstruction(fromPubkey, toATA, toPubkey, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
+          );
+          transaction.add(
+            createTransferCheckedInstruction(fromATA, mint, toATA, fromPubkey, usdtRaw, USDT_DECIMALS, [], TOKEN_PROGRAM_ID)
+          );
+          setPrepared({
+            network,
+            token: "USDT",
+            from: fromPubkey.toBase58(),
+            to: toPubkey.toBase58(),
+            fromATA: fromATA.toBase58(),
+            toATA: toATA.toBase58(),
+            mintAddress: mint.toBase58(),
+            usdtAmount: intent.amount,
+            lamports: 0,
+            recentBlockhash: blockhash,
+            serializedTransaction: window.btoa(String.fromCharCode(...transaction.serialize({ requireAllSignatures: false }))),
+            explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${cluster}`
+          });
+          logEvent("warn", "wallet", "USDT SPL transaction prepared in browser fallback.");
+          setMessage("USDT SPL transfer prepared in browser. Sign with Phantom to send on devnet.");
+        } else {
+          const lamports = Math.max(1, Math.round(intent.amount * LAMPORTS_PER_SOL));
+          const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash }).add(
+            SystemProgram.transfer({ fromPubkey, toPubkey, lamports })
+          );
+          setPrepared({
+            network,
+            token: "SOL",
+            from: fromPubkey.toBase58(),
+            to: toPubkey.toBase58(),
+            lamports,
+            recentBlockhash: transaction.recentBlockhash ?? blockhash,
+            serializedTransaction: window.btoa(String.fromCharCode(...transaction.serialize({ requireAllSignatures: false }))),
+            explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${cluster}`
+          });
+          logEvent("warn", "wallet", "Hosted API unavailable; SOL transaction prepared in browser fallback.");
+          setMessage("Hosted API unavailable, so the transaction was prepared in your browser.");
+        }
       } catch (fallbackError) {
         setMessage(fallbackError instanceof Error ? fallbackError.message : "Could not prepare transaction.");
         logEvent("error", "wallet", fallbackError instanceof Error ? fallbackError.message : "Could not prepare transaction.");
@@ -651,9 +700,12 @@ export default function App() {
                   />
                   {imagePreview ? <img src={imagePreview} alt="Payment upload preview" /> : <strong>Upload invoice image</strong>}
                 </label>
-                <div className="sample-row">
+                <div className="sample-row sample-row-3">
                   <button type="button" disabled={busy} onClick={() => loadSample(safeInvoice)}>
-                    Safe Sample
+                    Safe SOL
+                  </button>
+                  <button type="button" disabled={busy} onClick={() => loadSample(usdtInvoice)} className="usdt-sample-btn">
+                    Safe USDT
                   </button>
                   <button type="button" disabled={busy} onClick={() => loadSample(suspiciousInvoice)}>
                     Risky Sample
@@ -673,32 +725,53 @@ export default function App() {
               <section className="panel analysis-panel">
                 <div className="panel-header">
                   <span>2</span>
-                  <h2>Local Analysis</h2>
+                  <h2>QVAC Analysis</h2>
                 </div>
-                <div className="metric-row">
-                  <div>
-                    <small>Mode</small>
-                    <strong>{displayToken(analysis?.mode ?? qvacStatus?.mode)}</strong>
-                  </div>
-                  <div>
-                    <small>Runtime</small>
-                    <strong>{analysis ? `${analysis.qvacStats.processingMs}ms` : "Idle"}</strong>
-                  </div>
-                  <div>
-                    <small>Local Only</small>
-                    <strong>{qvacStatus?.localOnly ? "Yes" : "Checking"}</strong>
-                  </div>
-                  <div>
-                    <small>Paid Services</small>
-                    <strong>{qvacStatus?.paidServices === false ? "None" : "None"}</strong>
+
+                <div className="qvac-engine-bar">
+                  <span className={`qvac-mode-badge ${analysis?.mode ?? (qvacStatus?.mode === "live-qvac" ? "qvac" : "mock")}`}>
+                    {analysis?.mode === "qvac" ? "Live QVAC" : qvacStatus?.mode === "live-qvac" ? "Live QVAC" : "Browser Fallback"}
+                  </span>
+                  <span className="qvac-model-label">{analysis?.qvacStats.ocrModel ?? qvacStatus?.ocrModel ?? "—"}</span>
+                  <span className="qvac-runtime">{analysis ? `${analysis.qvacStats.processingMs}ms` : "Idle"}</span>
+                  <span className="qvac-local-badge">Local only · No cloud</span>
+                </div>
+
+                <div className="qvac-blocks-section">
+                  <small>OCR Blocks Extracted</small>
+                  <div className="qvac-blocks">
+                    {(analysis?.blocks ?? []).map((block, index) => (
+                      <div key={`${block.text}-${index}`} className="qvac-block-item">
+                        <span className="qvac-block-text">{block.text}</span>
+                        {block.confidence !== undefined && (
+                          <span className="qvac-confidence-badge">{Math.round(block.confidence * 100)}%</span>
+                        )}
+                      </div>
+                    ))}
+                    {!analysis && <p className="muted">OCR block extraction results will appear here after analysis.</p>}
                   </div>
                 </div>
-                <div className="ocr-list">
-                  {(analysis?.blocks ?? []).map((block, index) => (
-                    <p key={`${block.text}-${index}`}>{block.text}</p>
-                  ))}
-                  {!analysis && <p className="muted">OCR blocks and local analysis evidence will appear here.</p>}
-                </div>
+
+                {analysis?.intent.sourceFields && analysis.intent.sourceFields.length > 0 && (
+                  <div className="qvac-fields-section">
+                    <small>Field Extraction Confidence</small>
+                    <div className="qvac-source-fields">
+                      {analysis.intent.sourceFields.map((f) => (
+                        <div key={f.field} className="qvac-field-row">
+                          <span className="qvac-field-name">{f.field}</span>
+                          <span className="qvac-field-value">{f.value.length > 20 ? `${f.value.slice(0, 18)}…` : f.value}</span>
+                          <div className="qvac-bar-wrap">
+                            <div
+                              className="qvac-bar-fill"
+                              style={{ width: `${Math.round(f.confidence * 100)}%`, background: f.confidence >= 0.8 ? "#2f8c61" : f.confidence >= 0.5 ? "#d99e26" : "#e05050" }}
+                            />
+                          </div>
+                          <span className="qvac-field-pct">{Math.round(f.confidence * 100)}%</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </section>
 
               <section className={`panel risk-panel ${riskClass}`}>
@@ -773,7 +846,9 @@ export default function App() {
                   <h2>Sign Payment</h2>
                 </div>
                 <div className="safety-banner">
-                  Mainnet is enabled for SOL transfers only. Mainnet uses real funds and must be tested carefully before sharing with users.
+                  {intent?.token === "USDT"
+                    ? "USDT SPL token transfer — devnet uses demo USDT mint. Mainnet routes to real Tether (Es9vMF…). Real funds."
+                    : "Mainnet uses real SOL. Confirm before signing. Test on devnet first."}
                 </div>
                 <label className="network-control">
                   Network
@@ -799,7 +874,7 @@ export default function App() {
                       checked={mainnetAcknowledged}
                       onChange={(event) => setMainnetAcknowledged(event.target.checked)}
                     />
-                    I understand this prepares a real mainnet SOL transaction with real funds.
+                    I understand this prepares a real mainnet {intent?.token === "USDT" ? "USDT" : "SOL"} transaction with real funds.
                   </label>
                 )}
                 <div className="receipt-block">
@@ -819,15 +894,24 @@ export default function App() {
                   }
                   onClick={prepareTransaction}
                 >
-                  Prepare {networkLabels[network]} SOL
+                  {intent?.token === "USDT"
+                    ? `Prepare ${networkLabels[network]} USDT`
+                    : `Prepare ${networkLabels[network]} SOL`}
                 </button>
                 <button disabled={busy || !canSend} onClick={signAndSend}>
                   Sign And Send
                 </button>
                 {prepared && (
                   <div className="receipt-block">
-                    <small>Prepared transfer</small>
-                    <p>{prepared.lamports} lamports to {formatAddress(prepared.to)}</p>
+                    <small>Prepared {prepared.token ?? "SOL"} transfer</small>
+                    {prepared.token === "USDT" ? (
+                      <>
+                        <p>{prepared.usdtAmount} USDT → {formatAddress(prepared.to)}</p>
+                        {prepared.toATA && <p className="muted" style={{ fontSize: "0.72rem" }}>Token account: {formatAddress(prepared.toATA)}</p>}
+                      </>
+                    ) : (
+                      <p>{prepared.lamports} lamports → {formatAddress(prepared.to)}</p>
+                    )}
                   </div>
                 )}
                 {txSignature && prepared && (

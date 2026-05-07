@@ -764,14 +764,182 @@ small {
   grid-template-columns: 1fr 1fr;
 }
 
+.sample-row-3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .sample-row button {
   background: #245f45;
   min-height: 40px;
   padding: 0.65rem 0.85rem;
 }
 
+.usdt-sample-btn {
+  background: #2e5e7a !important;
+}
+
+.usdt-sample-btn:hover:not(:disabled) {
+  background: #3a7599 !important;
+}
+
 .sample-row button:last-child {
   background: #6b4a22;
+}
+
+.qvac-engine-bar {
+  align-items: center;
+  background: rgba(8, 13, 11, 0.72);
+  border: 1px solid rgba(239, 233, 210, 0.1);
+  border-radius: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.qvac-mode-badge {
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.7rem;
+  text-transform: uppercase;
+}
+
+.qvac-mode-badge.qvac {
+  background: rgba(47, 140, 97, 0.28);
+  border: 1px solid rgba(47, 140, 97, 0.5);
+  color: #7cf0af;
+}
+
+.qvac-mode-badge.mock,
+.qvac-mode-badge.sample {
+  background: rgba(110, 110, 110, 0.2);
+  border: 1px solid rgba(200, 200, 200, 0.2);
+  color: rgba(242, 239, 224, 0.72);
+}
+
+.qvac-model-label {
+  color: rgba(242, 239, 224, 0.6);
+  font-size: 0.78rem;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qvac-runtime {
+  color: rgba(242, 239, 224, 0.72);
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.qvac-local-badge {
+  background: rgba(47, 140, 97, 0.14);
+  border: 1px solid rgba(47, 140, 97, 0.28);
+  border-radius: 999px;
+  color: #7cf0af;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  padding: 0.22rem 0.6rem;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.qvac-blocks-section,
+.qvac-fields-section {
+  display: grid;
+  gap: 8px;
+}
+
+.qvac-blocks {
+  display: grid;
+  gap: 6px;
+  max-height: 180px;
+  overflow: auto;
+}
+
+.qvac-block-item {
+  align-items: center;
+  background: rgba(158, 230, 189, 0.07);
+  border: 1px solid rgba(158, 230, 189, 0.13);
+  border-radius: 10px;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  padding: 8px 10px;
+}
+
+.qvac-block-text {
+  color: rgba(242, 239, 224, 0.88);
+  flex: 1;
+  font-size: 0.84rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qvac-confidence-badge {
+  background: rgba(8, 13, 11, 0.6);
+  border: 1px solid rgba(239, 233, 210, 0.12);
+  border-radius: 999px;
+  color: rgba(242, 239, 224, 0.72);
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.18rem 0.5rem;
+}
+
+.qvac-source-fields {
+  display: grid;
+  gap: 6px;
+}
+
+.qvac-field-row {
+  align-items: center;
+  display: grid;
+  gap: 7px;
+  grid-template-columns: 70px 1fr 80px 36px;
+}
+
+.qvac-field-name {
+  color: rgba(242, 239, 224, 0.55);
+  font-size: 0.7rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.qvac-field-value {
+  color: rgba(242, 239, 224, 0.88);
+  font-size: 0.8rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qvac-bar-wrap {
+  background: rgba(239, 233, 210, 0.09);
+  border-radius: 999px;
+  height: 5px;
+  overflow: hidden;
+}
+
+.qvac-bar-fill {
+  border-radius: 999px;
+  height: 100%;
+  transition: width 320ms ease;
+}
+
+.qvac-field-pct {
+  color: rgba(242, 239, 224, 0.6);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: right;
 }
 
 .metric-row div,

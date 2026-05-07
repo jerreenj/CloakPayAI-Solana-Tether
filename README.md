@@ -1,69 +1,93 @@
 # CloakPay AI
 
-A local-first QVAC Tether payment firewall for Solana payments — checks invoice risk before a wallet signs, then enables devnet or mainnet-beta SOL transfer when the intent is clear.
+**Scan any invoice. Score the risk. Sign only when it's safe.**
 
-## Run & Operate
+CloakPay AI is a payment firewall for the Solana ecosystem — powered by QVAC, Tether's local-first AI platform. Before your wallet ever signs anything, CloakPay reads the invoice on your device, extracts what you're actually being asked to pay, and scores the risk. Your invoice data never leaves your device.
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 8080)
-- `pnpm --filter @workspace/cloakpay-ai run dev` — run the frontend (port 26259)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- Required env: `DATABASE_URL` — Postgres connection string (used by existing db package, not CloakPay itself)
-- Optional env: `QVAC_MOCK=0` — enables live local QVAC OCR mode (requires QVAC SDK native bindings)
-- Optional env: `SOLANA_DEVNET_RPC`, `SOLANA_MAINNET_RPC` — custom RPC endpoints (defaults to public ones)
+---
 
-## Stack
+## What happens when you use it
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- Frontend: React 19 + Vite + Tailwind CSS v4 + Framer Motion + Lucide + @solana/web3.js
-- API: Express 5 + pino logging
-- No database — all state is localStorage-only on the frontend
-- Build: esbuild (CJS bundle for API server)
+1. **Drop in any invoice** — Upload an image or paste raw text
+2. **QVAC reads it locally** — On-device OCR extracts the merchant name, amount, recipient wallet, token type, and memo — each with a confidence score
+3. **You see the risk verdict** — The risk engine scores the payment and flags suspicious patterns before you see the sign button
+4. **You review and approve** — Every extracted field is editable before anything is signed
+5. **Your wallet signs** — Only then does Phantom (or any Solana wallet) get asked for a signature
+6. **You get a privacy receipt** — A cryptographic proof of what was verified, stored only in your browser
 
-## Where things live
+---
 
-- `artifacts/cloakpay-ai/src/App.tsx` — main React app (payment firewall UI, all sections)
-- `artifacts/cloakpay-ai/src/types.ts` — shared TypeScript types (OCRBlock, PaymentIntent, RiskReport, etc.)
-- `artifacts/cloakpay-ai/src/localAnalysis.ts` — browser-side fallback analysis engine
-- `artifacts/cloakpay-ai/src/localStore.ts` — localStorage helpers (history, feedback, profile, monitor events)
-- `artifacts/cloakpay-ai/src/components/ui/prisma-hero.tsx` — hero section with animated title
-- `artifacts/cloakpay-ai/src/index.css` — full custom CSS (no Tailwind components used)
-- `artifacts/api-server/src/routes/qvac.ts` — GET /api/qvac/status, POST /api/qvac/analyze-payment
-- `artifacts/api-server/src/routes/solana.ts` — POST /api/solana/prepare
-- `artifacts/api-server/src/routes/privacy.ts` — POST /api/privacy/receipt
+## SOL and USDT
 
-## Architecture decisions
+CloakPay supports both **SOL** and **Tether (USDT)** transfers on Solana.
 
-- **No OpenAPI codegen** — CloakPay has a small, stable API surface (4 endpoints). Direct fetch calls from the frontend are simpler and faster to iterate on.
-- **localStorage-only state** — No user data leaves the browser except via explicit export. This is intentional for the hackathon privacy-first angle.
-- **Dual-mode analysis** — API server runs the risk engine server-side; if unavailable, the frontend falls back to an identical deterministic engine in the browser (`localAnalysis.ts`).
-- **QVAC_MOCK gate** — `@qvac/sdk` is marked as an esbuild external and imported dynamically. When `QVAC_MOCK !== "0"`, the server falls back to deterministic block parsing without requiring native bindings.
-- **Buffer polyfill** — `@solana/web3.js` uses Node.js `Buffer` in the browser; polyfilled via the `buffer` package in `vite.config.ts`.
+When your invoice is denominated in USDT, CloakPay builds the correct Solana SPL token transfer — so your wallet signs exactly what the invoice shows, with no manual address copying or amount transcription. The full token account setup is handled automatically.
 
-## Product
+- Devnet: uses a demo USDT token for safe testing
+- Mainnet: routes to the real Tether USDT contract (`Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB`)
 
-- **Hero** — Animated full-screen video hero with nav links
-- **Start Here (Demo)** — Try-without-wallet quick demo, user account, devnet faucet link, feedback links
-- **Payment Check (Firewall)** — Upload or paste invoice → OCR/text extraction → risk scoring → intent review → devnet/mainnet SOL signing → privacy receipt
-- **Operations (Readiness)** — Mainnet production readiness checklist
-- **History** — Local activity history with export
-- **Support (Feedback)** — Local feedback inbox, GitHub issue link, email support, event monitor log
+---
 
-## User preferences
+## Powered by QVAC — Local AI, No Cloud
 
-- Keep all state local-first (localStorage); no forced backend persistence
-- Fallback to browser analysis when API is unavailable (transparent to user)
-- Mainnet requires explicit real-funds confirmation before any SOL can move
+Most AI tools send your documents to a cloud server. QVAC runs entirely on your device — no API key, no subscription, no data leaving your machine. For payment invoices, which often contain sensitive vendor and financial information, this is exactly the right architecture.
 
-## Gotchas
+**What QVAC does inside CloakPay:**
 
-- `@qvac/sdk` requires native GPU/Vulkan bindings — it works only when `QVAC_MOCK=0` and the environment has the right native deps. The server falls back gracefully otherwise.
-- `@solana/web3.js` needs the `buffer` npm package polyfilled in Vite (see `vite.config.ts`).
-- The api-server esbuild build marks `@qvac/sdk` as external so the build doesn't fail when the SDK isn't installed.
-- Do NOT add a Vite proxy to reach the API — the shared Replit proxy already routes `/api` to the api-server.
+- Reads invoice images using on-device OCR (`@qvac/ocr-onnx`)
+- Extracts each payment field with an individual confidence score
+- Flags low-confidence extractions before you sign anything
+- Works entirely offline — the AI engine makes no network calls
 
-## Pointers
+The QVAC Analysis panel in the firewall shows you every OCR block that was extracted, each field's confidence score as a visual bar, and exactly what evidence was used to build the risk verdict.
 
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
-- Hackathon: Solana/Tether Frontier Hackathon, deadline May 11 2026
-- GitHub: https://github.com/jerreenj/CloakPayAI-Solana-Tether
+---
+
+## Privacy by design
+
+- All history, receipts, and account data live in your browser only
+- Export your history as a JSON file at any time
+- Nothing is sent to any server except the Solana RPC when confirming a transaction
+- The privacy receipt uses SHA-256 commitment + nullifier — the same cryptographic tooling as zero-knowledge proofs
+
+---
+
+## Try it now
+
+No wallet needed. Click **Try Without Wallet** for a 30-second demo of the full firewall flow.
+
+Three sample invoices are built in:
+- **Safe SOL** — a clean Solana SOL payment, scores safe
+- **Safe USDT** — a clean Tether USDT payment, shows the full SPL token flow
+- **Risky Sample** — urgency language, missing fields, scores as block
+
+For real devnet signing: [Get Devnet SOL →](https://faucet.solana.com/)
+
+---
+
+## Running locally
+
+```
+pnpm install
+pnpm --filter @workspace/api-server run dev   # API server on port 8080
+pnpm --filter @workspace/cloakpay-ai run dev  # Frontend on port 26259
+```
+
+To enable live QVAC OCR (requires local GPU/Vulkan bindings):
+```
+QVAC_MOCK=0 pnpm --filter @workspace/api-server run dev
+```
+
+---
+
+## Links
+
+- [GitHub](https://github.com/jerreenj/CloakPayAI-Solana-Tether)
+- [QVAC by Tether](https://qvac.tether.io)
+- [QVAC Docs](https://docs.qvac.tether.io)
+- [Solana Devnet Faucet](https://faucet.solana.com/)
+- [Submit feedback or report a bug](https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new)
+
+---
+
+*Built for the Solana / Tether Frontier Hackathon — May 2026*
