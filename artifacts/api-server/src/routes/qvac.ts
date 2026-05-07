@@ -202,12 +202,11 @@ function mockBlocks(fileName: string): OCRBlock[] {
 
 async function runQvacOcr(image: string): Promise<OCRBlock[]> {
   // @qvac/sdk is externalized in esbuild and loaded only when QVAC_MOCK=0.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sdk = (await import("@qvac/sdk")) as any;
+  const { loadModel, ocr, OCR_LATIN_RECOGNIZER_1 } = await import("@qvac/sdk");
 
   if (!ocrModelId) {
-    ocrModelId = await sdk.loadModel({
-      modelSrc: sdk.OCR_LATIN_RECOGNIZER_1,
+    ocrModelId = await loadModel({
+      modelSrc: OCR_LATIN_RECOGNIZER_1,
       modelType: "ocr",
       modelConfig: {
         langList: ["en"],
@@ -223,12 +222,12 @@ async function runQvacOcr(image: string): Promise<OCRBlock[]> {
   }
 
   const imageBuffer = Buffer.from(stripDataUrl(image), "base64");
-  const { blocks } = sdk.ocr({
+  const { blocks } = ocr({
     modelId: ocrModelId,
     image: imageBuffer,
     options: { paragraph: false }
   });
-  return (await blocks) as OCRBlock[];
+  return await blocks;
 }
 
 router.get("/qvac/status", (req, res) => {
