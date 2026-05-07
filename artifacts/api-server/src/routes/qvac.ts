@@ -201,8 +201,9 @@ function mockBlocks(fileName: string): OCRBlock[] {
 }
 
 async function runQvacOcr(image: string): Promise<OCRBlock[]> {
-  const qvac = await import("@qvac/sdk");
-  const sdk = qvac as typeof qvac & { OCR_LATIN_RECOGNIZER_1: unknown };
+  // @qvac/sdk is externalized in esbuild and loaded only when QVAC_MOCK=0.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sdk = (await import("@qvac/sdk")) as any;
 
   if (!ocrModelId) {
     ocrModelId = await sdk.loadModel({
