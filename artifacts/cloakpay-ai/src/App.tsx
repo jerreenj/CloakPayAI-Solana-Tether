@@ -1,11 +1,4 @@
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import {
-  createAssociatedTokenAccountInstruction,
-  createTransferCheckedInstruction,
-  getAssociatedTokenAddressSync,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID
-} from "@solana/spl-token";
 import { useEffect, useMemo, useState } from "react";
 import { PrismaHero } from "./components/ui/prisma-hero";
 import {
@@ -82,9 +75,6 @@ Amount: pending
 Memo: urgent wallet verification
 Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase.`;
 
-const USDT_DECIMALS = 6;
-const USDT_MINT_DEVNET = new PublicKey("4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU");
-const USDT_MINT_MAINNET = new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB");
 
 const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
 const faucetUrl = "https://faucet.solana.com/";
@@ -467,33 +457,7 @@ export default function App() {
         const cluster = network === "devnet" ? "?cluster=devnet" : "";
 
         if (intent.token === "USDT") {
-          const mint = network === "mainnet-beta" ? USDT_MINT_MAINNET : USDT_MINT_DEVNET;
-          const usdtRaw = BigInt(Math.round(intent.amount * 10 ** USDT_DECIMALS));
-          const fromATA = getAssociatedTokenAddressSync(mint, fromPubkey, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
-          const toATA = getAssociatedTokenAddressSync(mint, toPubkey, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
-          const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash });
-          transaction.add(
-            createAssociatedTokenAccountInstruction(fromPubkey, toATA, toPubkey, mint, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID)
-          );
-          transaction.add(
-            createTransferCheckedInstruction(fromATA, mint, toATA, fromPubkey, usdtRaw, USDT_DECIMALS, [], TOKEN_PROGRAM_ID)
-          );
-          setPrepared({
-            network,
-            token: "USDT",
-            from: fromPubkey.toBase58(),
-            to: toPubkey.toBase58(),
-            fromATA: fromATA.toBase58(),
-            toATA: toATA.toBase58(),
-            mintAddress: mint.toBase58(),
-            usdtAmount: intent.amount,
-            lamports: 0,
-            recentBlockhash: blockhash,
-            serializedTransaction: window.btoa(String.fromCharCode(...transaction.serialize({ requireAllSignatures: false }))),
-            explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${cluster}`
-          });
-          logEvent("warn", "wallet", "USDT SPL transaction prepared in browser fallback.");
-          setMessage("USDT SPL transfer prepared in browser. Sign with Phantom to send on devnet.");
+          throw new Error("USDT SPL token transfer requires the CloakPay API server. The API is currently unavailable — please try again or switch to SOL for offline signing.");
         } else {
           const lamports = Math.max(1, Math.round(intent.amount * LAMPORTS_PER_SOL));
           const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash }).add(
