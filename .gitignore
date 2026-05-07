@@ -2,6 +2,8 @@ node_modules/
 dist/
 .env
 .env.local
-.cache/
 *.log
+.cache/
+.DS_Store
 *.tsbuildinfo
+.replit-artifact/

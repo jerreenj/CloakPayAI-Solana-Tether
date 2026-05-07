@@ -1,53 +1,16 @@
 {
-  "name": "cloakpay-ai",
-  "version": "0.1.0",
-  "private": false,
-  "type": "module",
-  "description": "CloakPay AI, a local-first QVAC Tether payment firewall for Solana payments.",
-  "homepage": "https://cloakpay-ai.vercel.app",
-  "keywords": [
-    "qvac",
-    "tether",
-    "solana",
-    "devnet",
-    "mainnet",
-    "payment-firewall",
-    "privacy",
-    "monitoring",
-    "user-accounts"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jerreenj/CloakPayAI-Solana-Tether.git"
-  },
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"npm:dev:api\" \"npm:dev:web\"",
-    "dev:web": "vite --host 127.0.0.1 --port 5173",
-    "dev:api": "tsx watch server/index.ts",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview --host 127.0.0.1 --port 4173",
-    "typecheck": "tsc --noEmit"
+    "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },
-  "dependencies": {
-    "@qvac/sdk": "^0.8.0",
-    "@solana/web3.js": "^1.98.0",
-    "@tailwindcss/vite": "^4.2.4",
-    "@vitejs/plugin-react": "^5.0.0",
-    "concurrently": "^9.1.2",
-    "express": "^4.21.2",
-    "framer-motion": "^12.38.0",
-    "lucide-react": "^1.14.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwindcss": "^4.2.4",
-    "tsx": "^4.19.2",
-    "vite": "^7.0.0"
-  },
+  "private": true,
   "devDependencies": {
-    "@types/express": "^4.17.21",
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "typescript": "^5.7.2"
+    "typescript": "~5.9.2",
+    "prettier": "^3.8.1"
   }
 }
