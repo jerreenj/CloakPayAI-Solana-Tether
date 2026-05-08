@@ -147,11 +147,11 @@ function displayToken(value?: string) {
     .join("-");
 }
 
-function toPublicKey(value: string, fallback: string) {
+function toPublicKey(value: string, label: string) {
   try {
     return new PublicKey(value);
   } catch {
-    return new PublicKey(fallback);
+    throw new Error(`Invalid ${label} address.`);
   }
 }
 
@@ -193,7 +193,7 @@ export default function App() {
   const [monitorEvents, setMonitorEvents] = useState<MonitorEvent[]>(() => loadMonitorEvents());
   const [accountName, setAccountName] = useState(() => loadProfile()?.name ?? "Preview Operator");
   const [accountEmail, setAccountEmail] = useState(() => loadProfile()?.email ?? "");
-  const [network, setNetwork] = useState<NetworkCluster>("devnet");
+  const [network, setNetwork] = useState<NetworkCluster>("mainnet-beta");
   const [mainnetAcknowledged, setMainnetAcknowledged] = useState(false);
   const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>("bug");
   const [feedbackText, setFeedbackText] = useState("");
@@ -212,12 +212,12 @@ export default function App() {
         setQvacStatus({
           localOnly: true,
           mode: "fallback-demo",
-          ocrModel: "browser fallback",
+          ocrModel: "browser local fallback",
           llmModel: "browser-risk-engine",
           paidServices: false,
-          notes: ["Hosted API unavailable; public preview is running in browser fallback mode."]
+          notes: ["Hosted API unavailable; local browser analysis is active."]
         });
-        setMessage("Public preview ready in browser fallback mode.");
+        setMessage("Local browser analysis is active.");
       });
   }, []);
 
@@ -435,7 +435,7 @@ export default function App() {
   async function connectWallet() {
     const provider = window.solana;
     if (!provider) {
-      setMessage("No injected Solana wallet found. Install Phantom or another Solana wallet for real devnet signing.");
+      setMessage("No injected Solana wallet found. Install Phantom or another Solana wallet for real Solana signing.");
       return;
     }
     const result = await provider.connect();
@@ -477,14 +477,13 @@ export default function App() {
     } catch {
       try {
         const connection = getConnection(network);
-        const fallbackKey = "11111111111111111111111111111111";
-        const fromPubkey = toPublicKey(walletAddress, fallbackKey);
-        const toPubkey = toPublicKey(intent.recipientAddress, fallbackKey);
+        const fromPubkey = toPublicKey(walletAddress, "payer");
+        const toPubkey = toPublicKey(intent.recipientAddress, "recipient");
         const { blockhash } = await connection.getLatestBlockhash("confirmed");
         const cluster = network === "devnet" ? "?cluster=devnet" : "";
 
         if (intent.token === "USDT") {
-          throw new Error("USDT SPL token transfer requires the CloakPay API server. The API is currently unavailable — please try again or switch to SOL for offline signing.");
+          throw new Error("USDT SPL token transfer requires the CloakPay API server. The API is currently unavailable - please try again.");
         } else {
           const lamports = Math.max(1, Math.round(intent.amount * LAMPORTS_PER_SOL));
           const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash }).add(
@@ -500,7 +499,7 @@ export default function App() {
             serializedTransaction: window.btoa(String.fromCharCode(...transaction.serialize({ requireAllSignatures: false }))),
             explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${cluster}`
           });
-          logEvent("warn", "wallet", "Hosted API unavailable; SOL transaction prepared in browser fallback.");
+          logEvent("warn", "wallet", "Hosted API unavailable; SOL transaction prepared in browser.");
           setMessage("Hosted API unavailable, so the transaction was prepared in your browser.");
         }
       } catch (fallbackError) {
@@ -645,8 +644,8 @@ export default function App() {
               </div>
               <div>
                 <small>Wallet testers</small>
-                <strong>Start on devnet, switch when ready.</strong>
-                <p>Use devnet for public testing. Mainnet is available only after the real-funds warning is confirmed.</p>
+                <strong>Mainnet-ready with a real-funds gate.</strong>
+                <p>Mainnet-beta is the real rail. Devnet remains available for testers who do not want to move funds.</p>
                 <a href={faucetUrl} target="_blank" rel="noreferrer">
                   Get Devnet SOL
                 </a>
@@ -842,8 +841,8 @@ export default function App() {
                 </div>
                 <div className="safety-banner">
                   {intent?.token === "USDT"
-                    ? "USDT SPL token transfer — devnet uses demo USDT mint. Mainnet routes to real Tether (Es9vMF…). Real funds."
-                    : "Mainnet uses real SOL. Confirm before signing. Test on devnet first."}
+                    ? "USDT SPL token transfer. Mainnet-beta routes to real Tether USDT (Es9vMF...). Real funds."
+                    : "Mainnet-beta uses real SOL. Confirm before signing. Devnet is optional for public testing."}
                 </div>
                 <label className="network-control">
                   Network
@@ -1000,7 +999,7 @@ export default function App() {
             <section className="panel history-panel">
               <div className="panel-header">
                 <span>7</span>
-                <h2>Local User History</h2>
+                <h2>History</h2>
               </div>
               <p className="muted">
                 Account: {profile?.name ?? "Not saved"} {profile?.walletAddress ? `· ${formatAddress(profile.walletAddress)}` : ""}. This profile lives in this browser unless exported.
@@ -1055,7 +1054,7 @@ export default function App() {
             <section className="panel feedback-panel">
               <div className="panel-header">
                 <span>8</span>
-                <h2>Preview Feedback Loop</h2>
+                <h2>Feedback</h2>
               </div>
               <label>
                 Category

@@ -24,11 +24,11 @@ const USDT_MINT: Record<NetworkCluster, PublicKey> = {
   "mainnet-beta": new PublicKey("Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB")
 };
 
-function toPublicKey(value: string, fallback: string) {
+function toPublicKey(value: string, label: string) {
   try {
     return new PublicKey(value);
   } catch {
-    return new PublicKey(fallback);
+    throw new Error(`Invalid ${label} address.`);
   }
 }
 
@@ -39,12 +39,21 @@ router.post("/solana/prepare", async (req, res) => {
     network?: NetworkCluster;
   };
 
-  const fallbackKey = "11111111111111111111111111111111";
   const cluster = network === "devnet" ? "?cluster=devnet" : "";
   const endpoint = endpoints[network] ?? endpoints["devnet"];
   const connection = new Connection(endpoint, "confirmed");
-  const fromPubkey = toPublicKey(payer, fallbackKey);
-  const toPubkey = toPublicKey(intent.recipientAddress, fallbackKey);
+  let fromPubkey: PublicKey;
+  let toPubkey: PublicKey;
+
+  try {
+    fromPubkey = toPublicKey(payer, "payer");
+    toPubkey = toPublicKey(intent.recipientAddress, "recipient");
+  } catch (error) {
+    return res.status(400).json({
+      error: error instanceof Error ? error.message : "Invalid Solana address."
+    });
+  }
+
   const { blockhash } = await connection.getLatestBlockhash("confirmed");
 
   if (intent.token === "USDT") {

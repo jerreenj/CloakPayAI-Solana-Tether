@@ -52,7 +52,7 @@ When a workflow is denominated in USDT, CloakPay prepares the Solana SPL token t
 ## What Is Real
 
 - Live app: https://cloakpay-ai.vercel.app.
-- Connected API paths: `/api/health`, `/api/qvac/status`, `/api/qvac/analyze-payment`, `/api/solana/prepare`, `/api/privacy/receipt`.
+- Connected API paths: `/api/healthz`, `/api/qvac/status`, `/api/qvac/analyze-payment`, `/api/solana/prepare`, `/api/privacy/receipt`.
 - Real Solana transaction preparation for SOL and USDT SPL transfers.
 - Mainnet-beta path is available only after explicit real-funds confirmation.
 - Wallet signing stays wallet-side.
