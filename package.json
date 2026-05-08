@@ -2,6 +2,7 @@
   "name": "workspace",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "license": "MIT",
   "description": "CloakPay AI, a private QVAC business operating system for Solana teams.",
   "homepage": "https://cloakpay-ai.vercel.app",
