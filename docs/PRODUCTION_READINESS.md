@@ -5,8 +5,8 @@
 - Legal Desk first-run workflow for first-time users.
 - Legal, merchant, wallet lens, and payroll workflow briefs.
 - QVAC/local analysis path with browser fallback for hosted reliability.
-- Devnet and mainnet-beta SOL transfer preparation.
-- Devnet and mainnet-beta USDT SPL transfer preparation through the API server.
+- Mainnet-beta SOL transfer preparation with explicit real-funds confirmation.
+- Mainnet-beta USDT SPL transfer preparation through the API server.
 - Explicit mainnet real-funds confirmation gate.
 - Wallet-linked local user profile.
 - Local history, receipt proof, and account export.
@@ -28,18 +28,18 @@ These are not code switches; they are operating responsibilities before pushing 
 ## Zero-Dollar Operating Path
 
 - AI: QVAC local runtime or deterministic browser fallback.
-- RPC: public Solana devnet and mainnet-beta RPC.
+- RPC: public Solana mainnet-beta RPC, with optional test rail for non-fund testers.
 - Hosting: local demo or Vercel free tier.
 - Storage: browser localStorage and optional JSON export.
 - Support: email, GitHub issues, exported tester feedback.
 - Assets: CSS and product workflow starter text.
-- Funds: devnet faucet SOL for public tests; mainnet SOL only when the operator chooses to test real funds.
+- Funds: mainnet funds only after explicit operator confirmation; optional test rail for public testers.
 
 ## 200-User Rollout Plan
 
 1. Send the Vercel link to 20 users first.
 2. Ask most testers to run Legal Desk first.
-3. Ask wallet testers to start on devnet.
+3. Ask wallet testers to use the optional test rail first only if they refuse to move funds.
 4. Use mainnet-beta only with explicit real-funds confirmation.
 5. Export local feedback and monitor events after test sessions.
 6. Fix confusing UI, failed wallet paths, and false-positive risk scoring.

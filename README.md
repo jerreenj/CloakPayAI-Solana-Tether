@@ -10,7 +10,7 @@
     ·
     <a href="https://github.com/jerreenj/CloakPayAI-Solana-Tether"><strong>GitHub</strong></a>
     ·
-    <a href="docs/DEMO_SCRIPT.md"><strong>Demo Script</strong></a>
+    <a href="docs/DEMO_SCRIPT.md"><strong>Submission Script</strong></a>
     ·
     <a href="docs/SUBMISSION_CHECKLIST.md"><strong>Submission Checklist</strong></a>
   </p>
@@ -45,8 +45,8 @@ CloakPay supports both **SOL** and **Tether (USDT)** transfers on Solana.
 
 When a workflow is denominated in USDT, CloakPay prepares the Solana SPL token transfer so the wallet signs the token, destination, and amount shown in the review screen.
 
-- Devnet: uses the configured preview USDT mint for safe testing.
 - Mainnet-beta: routes to the real Tether USDT mint (`Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB`) after explicit real-funds confirmation.
+- Test rail: available for wallet testers who refuse to move funds, using a non-production USDT mint.
 - CloakPay never asks for seed phrases and never takes custody.
 
 ## What Is Real
