@@ -78,7 +78,7 @@ export const WordsPullUpMultiStyle = ({ segments, className = "", style }: Words
 };
 
 const navItems = [
-  { label: "Desk", href: "#demo" },
+  { label: "Desk", href: "#desk" },
   { label: "Legal", href: "#firewall" },
   { label: "Merchant", href: "#readiness" },
   { label: "Lens", href: "#history" },

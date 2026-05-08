@@ -211,7 +211,7 @@ export default function App() {
       .catch(() => {
         setQvacStatus({
           localOnly: true,
-          mode: "fallback-demo",
+          mode: "browser-fallback",
           ocrModel: "browser local fallback",
           llmModel: "browser-risk-engine",
           paidServices: false,
@@ -586,7 +586,7 @@ export default function App() {
       <PrismaHero />
 
       <section className="app-shell" aria-label="CloakPay AI product workspace">
-        <section id="demo" className="app-section demo-section">
+        <section id="desk" className="app-section demo-section">
           <div className="section-inner">
             <header className="view-header">
               <div>
@@ -609,7 +609,7 @@ export default function App() {
               ))}
             </section>
 
-            <section className="flow-rail" aria-label="Demo flow">
+            <section className="flow-rail" aria-label="CloakPay workflow">
               {["Input", "Analyze", "Decide", "Review", "Sign", "Receipt"].map((step, index) => (
                 <div key={step} className={index < 2 || analysis ? "active" : ""}>
                   <span>{index + 1}</span>
@@ -645,9 +645,9 @@ export default function App() {
               <div>
                 <small>Wallet testers</small>
                 <strong>Mainnet-ready with a real-funds gate.</strong>
-                <p>Mainnet-beta is the real rail. Devnet remains available for testers who do not want to move funds.</p>
+                  <p>Mainnet-beta is the real rail. Use the optional test rail only when a tester refuses to move funds.</p>
                 <a href={faucetUrl} target="_blank" rel="noreferrer">
-                  Get Devnet SOL
+                  Get Test SOL
                 </a>
               </div>
               <div>
@@ -723,7 +723,7 @@ export default function App() {
                 </div>
 
                 <div className="qvac-engine-bar">
-                  <span className={`qvac-mode-badge ${analysis?.mode ?? (qvacStatus?.mode === "live-qvac" ? "qvac" : "mock")}`}>
+                  <span className={`qvac-mode-badge ${analysis?.mode ?? (qvacStatus?.mode === "live-qvac" ? "qvac" : "fallback")}`}>
                     {analysis?.mode === "qvac" ? "Live QVAC" : qvacStatus?.mode === "live-qvac" ? "Live QVAC" : "Browser Fallback"}
                   </span>
                   <span className="qvac-model-label">{analysis?.qvacStats.ocrModel ?? qvacStatus?.ocrModel ?? "—"}</span>
@@ -842,7 +842,7 @@ export default function App() {
                 <div className="safety-banner">
                   {intent?.token === "USDT"
                     ? "USDT SPL token transfer. Mainnet-beta routes to real Tether USDT (Es9vMF...). Real funds."
-                    : "Mainnet-beta uses real SOL. Confirm before signing. Devnet is optional for public testing."}
+                    : "Mainnet-beta uses real SOL. Confirm before signing. The test rail is optional for public testers."}
                 </div>
                 <label className="network-control">
                   Network
@@ -857,7 +857,7 @@ export default function App() {
                       logEvent("info", "wallet", `Network switched to ${networkLabels[nextNetwork]}.`);
                     }}
                   >
-                    <option value="devnet">Devnet</option>
+                    <option value="devnet">Testnet</option>
                     <option value="mainnet-beta">Mainnet-Beta</option>
                   </select>
                 </label>
@@ -1010,7 +1010,7 @@ export default function App() {
                     <div>
                       <strong>{item.merchant}</strong>
                       <p>
-                        {item.amount} {item.token} · {item.network ? networkLabels[item.network] : "Devnet"} · {verdictLabel(item.verdict)} · {item.score}/100
+                      {item.amount} {item.token} · {item.network ? networkLabels[item.network] : "Testnet"} · {verdictLabel(item.verdict)} · {item.score}/100
                       </p>
                     </div>
                     <small>{new Date(item.createdAt).toLocaleString()}</small>

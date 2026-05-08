@@ -824,7 +824,7 @@ small {
   color: #7cf0af;
 }
 
-.qvac-mode-badge.mock,
+.qvac-mode-badge.fallback,
 .qvac-mode-badge.sample {
   background: rgba(110, 110, 110, 0.2);
   border: 1px solid rgba(200, 200, 200, 0.2);

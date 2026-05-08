@@ -1,6 +1,6 @@
 import type { AnalysisResponse, OCRBlock, PaymentIntent, PrivacyReceipt, QvacStats, RiskReport, SourceField } from "./types";
 
-const demoRecipient = "AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee";
+const fallbackRecipient = "AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee";
 
 function textToBlocks(text: string): OCRBlock[] {
   return text
@@ -10,11 +10,11 @@ function textToBlocks(text: string): OCRBlock[] {
     .map((line) => ({ text: line, confidence: 0.94 }));
 }
 
-function mockBlocks(fileName: string): OCRBlock[] {
+function fallbackBlocks(fileName: string): OCRBlock[] {
   return [
     { text: "Merchant: Public Preview", confidence: 0.9 },
     { text: "Amount: 0.25 SOL", confidence: 0.88 },
-    { text: `Recipient: ${demoRecipient}`, confidence: 0.86 },
+    { text: `Recipient: ${fallbackRecipient}`, confidence: 0.86 },
     { text: `Memo: ${fileName.replace(/\.[^.]+$/, "")}`, confidence: 0.82 }
   ];
 }
@@ -54,23 +54,23 @@ function parseIntent(blocks: OCRBlock[]): PaymentIntent {
   const merchantEvidence = findEvidence(lines, /\b(?:merchant|vendor|from|payee)\b/i);
   const merchantValue = extractField(merchantEvidence, ["merchant", "vendor", "from", "payee"]);
 
-  const recipientAddress = addressMatch?.[0] ?? demoRecipient;
+  const recipientAddress = addressMatch?.[0] ?? fallbackRecipient;
   const amount = amountMatch ? Number(amountMatch[1]) : 0.25;
   const token = (tokenMatch?.[1]?.toUpperCase() as "SOL" | "USDT" | undefined) ?? "UNKNOWN";
   const memo = memoValue ?? "CloakPay browser fallback";
   const merchant = merchantValue ?? "Unknown merchant";
   const warnings: string[] = [];
 
-  sourceFields.push(source("recipient", recipientAddress, addressEvidence || "Generated demo recipient", addressMatch ? 0.86 : 0.35));
-  sourceFields.push(source("amount", String(amount), amountEvidence || "Generated demo amount", amountMatch ? 0.88 : 0.4));
+  sourceFields.push(source("recipient", recipientAddress, addressEvidence || "Fallback recipient requires review", addressMatch ? 0.86 : 0.35));
+  sourceFields.push(source("amount", String(amount), amountEvidence || "Fallback amount requires review", amountMatch ? 0.88 : 0.4));
   sourceFields.push(source("token", token, tokenEvidence || "No token found", tokenMatch ? 0.9 : 0.35));
-  sourceFields.push(source("memo", memo, memoEvidence || "Generated memo", memoValue ? 0.82 : 0.45));
+  sourceFields.push(source("memo", memo, memoEvidence || "Fallback memo requires review", memoValue ? 0.82 : 0.45));
   sourceFields.push(source("merchant", merchant, merchantEvidence || "No merchant found", merchantValue ? 0.78 : 0.35));
 
   if (!addressMatch) warnings.push("Recipient address needs manual confirmation.");
   if (!amountMatch) warnings.push("Amount needs manual confirmation.");
-  if (!tokenMatch) warnings.push("Token was not found; devnet transfer defaults to SOL.");
-  if (!memoValue) warnings.push("Memo was not found; using a safe demo memo.");
+  if (!tokenMatch) warnings.push("Token was not found; confirm SOL or USDT before signing.");
+  if (!memoValue) warnings.push("Memo was not found; review the fallback memo before signing.");
 
   return {
     recipientAddress,
@@ -109,12 +109,12 @@ function buildRiskReport(intent: PaymentIntent, blocks: OCRBlock[], browserFallb
   if (intent.token === "UNKNOWN") {
     score += 12;
     warnings.push("Payment token is unknown; verify token before signing.");
-    evidence.push("Token symbol missing; app will use SOL for the devnet demo only.");
+    evidence.push("Token symbol missing; wallet review must confirm SOL or USDT before signing.");
   }
 
   if (intent.amount >= 2) {
     score += 14;
-    warnings.push("Large devnet amount detected; confirm this is intentional.");
+    warnings.push("Large amount detected; confirm this is intentional before signing.");
     evidence.push(`Amount parsed as ${intent.amount} ${intent.token === "UNKNOWN" ? "SOL" : intent.token}.`);
   }
 
@@ -159,11 +159,11 @@ function buildStats(startedAt: number): QvacStats {
 
 export function analyzeLocally(input: { text?: string; fileName: string; browserFallback?: boolean }): AnalysisResponse {
   const startedAt = Date.now();
-  const blocks = input.text?.trim() ? textToBlocks(input.text) : mockBlocks(input.fileName);
+  const blocks = input.text?.trim() ? textToBlocks(input.text) : fallbackBlocks(input.fileName);
   const intent = parseIntent(blocks);
 
   return {
-    mode: "mock",
+    mode: "fallback",
     blocks,
     intent,
     riskReport: buildRiskReport(intent, blocks, Boolean(input.browserFallback)),

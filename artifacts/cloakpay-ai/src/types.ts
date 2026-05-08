@@ -51,7 +51,7 @@ export type QvacStats = {
 };
 
 export type AnalysisResponse = {
-  mode: "qvac" | "mock" | "sample";
+  mode: "qvac" | "fallback" | "sample";
   blocks: OCRBlock[];
   intent: PaymentIntent;
   riskReport: RiskReport;
@@ -60,7 +60,7 @@ export type AnalysisResponse = {
 
 export type QvacStatus = {
   localOnly: true;
-  mode: "live-qvac" | "fallback-demo";
+  mode: "live-qvac" | "browser-fallback";
   ocrModel: string;
   llmModel: string;
   paidServices: false;
