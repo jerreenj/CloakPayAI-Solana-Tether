@@ -563,7 +563,8 @@ small {
   margin-bottom: 18px;
 }
 
-.user-guide div {
+.user-guide div,
+.operator-strip div {
   background: rgba(15, 21, 18, 0.86);
   border: 1px solid rgba(239, 233, 210, 0.1);
   border-radius: 16px;
@@ -574,18 +575,29 @@ small {
   padding: 18px;
 }
 
-.user-guide p {
+.user-guide p,
+.operator-strip p {
   color: rgba(242, 239, 224, 0.64);
   line-height: 1.5;
 }
 
 .user-guide button,
-.user-guide a {
+.user-guide a,
+.operator-strip button,
+.operator-strip a {
   margin-top: 4px;
 }
 
-.user-guide input {
+.user-guide input,
+.operator-strip input {
   min-height: 42px;
+}
+
+.operator-strip {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(260px, 1.1fr) minmax(220px, 0.9fr) minmax(220px, 0.9fr);
+  margin-bottom: 18px;
 }
 
 .mini-actions {
@@ -1383,6 +1395,7 @@ code {
   .stack-strip,
   .flow-rail,
   .user-guide,
+  .operator-strip,
   .readiness-grid,
   .community-grid,
   .console-grid {

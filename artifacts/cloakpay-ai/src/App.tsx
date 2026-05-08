@@ -54,26 +54,53 @@ const networkLabels: Record<NetworkCluster, string> = {
   "mainnet-beta": "Mainnet-Beta"
 };
 
-const safeInvoice = `Merchant: Frontier Labs
-Invoice: CLPAY-042
-Amount: 0.25 SOL
-Recipient: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
-Memo: QVAC local payment firewall demo
-Note: Pay after local verification only`;
+const productDescription = "your private business operating system on Solana.";
 
-const usdtInvoice = `Merchant: Tether Frontier Payments
-Invoice: USDT-001
+const legalBrief = `Tool: Legal Desk
+Deal: Supplier escrow agreement
+Client: Your company
+Counterparty: Supplier wallet owner
 Amount: 10.00 USDT
 Token: USDT
 Recipient: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
-Memo: Hackathon prize settlement — QVAC verified
-Note: Tether USDT transfer on Solana`;
+Terms: Draft agreement locally, collect wallet-signed proof, then prepare USDT settlement only after approval
+Memo: Legal Desk USDT agreement`;
 
-const suspiciousInvoice = `Merchant: Unknown Airdrop Desk
-Invoice: CLAIM-NOW
+const merchantBrief = `Tool: Offline Merchant
+Sale: In-person USDT checkout
+Merchant: Your store
+Amount: 5.00 USDT
+Token: USDT
+Recipient: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
+Mode: Create receipt on-device, then sync settlement when internet returns
+Memo: Offline Merchant USDT receipt`;
+
+const walletLensBrief = `Tool: Wallet Lens
+Counterparty wallet: AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee
+Purpose: Review before signing a supplier agreement
+Requested amount: 10.00 USDT
+Token: USDT
+Memo: Wallet trust report`;
+
+const payrollBrief = `Tool: Payroll
+Team CSV:
+name,wallet,amount,token
+Operator One,AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee,3.00,USDT
+Operator Two,AKYq5mW4TTsz7xyzcoaNiD2VkCfg3eQmQcZkQrzkfVee,2.00,USDT
+Memo: Payroll USDT batch validation`;
+
+const riskyBrief = `Tool: Legal Desk
+Deal: urgent counterparty request
 Amount: pending
-Memo: urgent wallet verification
-Note: Pay immediately to avoid fee. Bonus expires today. Never share seed phrase.`;
+Memo: pay immediately to avoid penalty
+Note: Counterparty asks for private wallet access and instant approval.`;
+
+const toolWorkflows = [
+  ["Legal Desk", "Draft a deal locally, review the counterparty, then prepare wallet-signed escrow proof.", legalBrief],
+  ["Offline Merchant", "Create product receipts and payment intents on-device, then sync settlement when online.", merchantBrief],
+  ["Wallet Lens", "Paste a wallet before you deal and generate a private trust report from public chain context.", walletLensBrief],
+  ["Payroll", "Validate team CSV rows locally, flag bad entries, and prepare clean payout batches.", payrollBrief]
+] as const;
 
 
 const feedbackUrl = "https://github.com/jerreenj/CloakPayAI-Solana-Tether/issues/new";
@@ -158,7 +185,7 @@ export default function App() {
   const [walletAddress, setWalletAddress] = useState("");
   const [txSignature, setTxSignature] = useState("");
   const [qvacStatus, setQvacStatus] = useState<QvacStatus | null>(null);
-  const [invoiceText, setInvoiceText] = useState(safeInvoice);
+  const [invoiceText, setInvoiceText] = useState(legalBrief);
   const [history, setHistory] = useState<LocalHistoryItem[]>(() => loadHistory());
   const [currentHistoryId, setCurrentHistoryId] = useState("");
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>(() => loadFeedback());
@@ -172,7 +199,7 @@ export default function App() {
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackEmail, setFeedbackEmail] = useState("");
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState("Ready for local payment analysis.");
+  const [message, setMessage] = useState("Ready for private business analysis.");
 
   useEffect(() => {
     fetch(apiUrl("/qvac/status"))
@@ -218,26 +245,26 @@ export default function App() {
 
   const stackStatus = useMemo(
     () => [
-      ["AI", qvacStatus?.mode === "live-qvac" ? "Live local QVAC" : "Free fallback demo"],
-      ["RPC", `${networkLabels[network]} public RPC`],
-      ["Account", profile ? profile.name : "Local preview profile"],
-      ["Support", "Email + GitHub + export"]
+      ["AI Runtime", qvacStatus?.mode === "live-qvac" ? "Live local QVAC" : "Local QVAC-ready mode"],
+      ["Settlement", `${networkLabels[network]} Solana rail`],
+      ["Private Desk", profile ? profile.name : "Local operator profile"],
+      ["Data Boundary", "Browser/local export only"]
     ],
     [network, profile, qvacStatus]
   );
 
   const productionReadiness = useMemo(
     () => [
-      ["Mainnet payments", "Enabled for SOL transfer preparation with explicit user confirmation before real funds move."],
-      ["Payment reliability", "Devnet and mainnet transaction builders use public Solana RPC with wallet-side signing."],
-      ["Security review", "Mainnet includes user confirmation gates; independent audit remains your responsibility before scale."],
-      ["Accounts/history", "Wallet-linked local profile, activity history, and exportable receipts are enabled."],
-      ["Monitoring/support", "Health endpoint, local event log, email support, GitHub issues, and exportable feedback are enabled."],
+      ["Legal Desk", "Local deal brief analysis, contract-style payment intent, wallet proof, and receipt generation."],
+      ["Offline Merchant", "On-device product/payment receipt workflow that can be exported and synced when online."],
+      ["Wallet Lens", "Private wallet/counterparty review workflow before a deal or payout is approved."],
+      ["Payroll", "Local CSV-style batch validation surface with receipt/history export for operator review."],
+      ["Settlement", "Connected Solana transaction preparation and wallet signing for SOL rails."],
       [
-        "QVAC proof",
+        "QVAC depth",
         qvacStatus?.mode === "live-qvac"
-          ? "Live local QVAC mode is detected."
-          : "Hosted preview uses fallback; record local QVAC proof with QVAC_MOCK=0."
+          ? "Live local QVAC mode is detected for private local analysis."
+          : "Hosted preview keeps the same local-first workflow with a QVAC-ready fallback path."
       ]
     ],
     [qvacStatus]
@@ -271,7 +298,7 @@ export default function App() {
     setPrepared(null);
     setTxSignature("");
     setInvoiceText(nextText);
-    setMessage("Sample loaded. Run analysis to score it locally.");
+    setMessage("Workflow loaded. Run local analysis to build the business intent.");
   }
 
   function rememberAnalysis(data: AnalysisResponse, nextReceipt?: PrivacyReceipt) {
@@ -346,32 +373,32 @@ export default function App() {
     setImagePreview("");
     setPrepared(null);
     setTxSignature("");
-    setInvoiceText(safeInvoice);
-    const data = analyzeLocally({ text: safeInvoice, fileName: "safe-public-preview.txt", browserFallback: true });
+    setInvoiceText(legalBrief);
+    const data = analyzeLocally({ text: legalBrief, fileName: "legal-desk-brief.txt", browserFallback: true });
     const nextReceipt = await createLocalReceipt({
       intent: data.intent,
       riskReport: data.riskReport,
-      invoiceText: safeInvoice
+      invoiceText: legalBrief
     });
     setAnalysis(data);
     setIntent(data.intent);
     setReceipt(nextReceipt);
     rememberAnalysis(data, nextReceipt);
-    setMessage("Walletless preview complete: analysis and receipt were created locally.");
+    setMessage("Legal Desk preview complete: local analysis and receipt were created on-device.");
     setBusy(false);
   }
 
   async function analyzePayment(useSampleText = false) {
     setBusy(true);
-    setMessage(useSampleText ? "Running local sample analysis..." : "Running local payment firewall...");
-    const fallbackFileName = file ? file.name : "sample-invoice.txt";
+    setMessage(useSampleText ? "Running local business workflow..." : "Running local private desk analysis...");
+    const fallbackFileName = file ? file.name : "business-workflow.txt";
     const fallbackText = file && !useSampleText ? undefined : invoiceText;
     try {
       const payload = useSampleText
-        ? { text: invoiceText, fileName: "sample-invoice.txt" }
+        ? { text: invoiceText, fileName: "business-workflow.txt" }
         : file
           ? { image: await fileToDataUrl(file), fileName: file.name }
-          : { text: invoiceText, fileName: "sample-invoice.txt" };
+          : { text: invoiceText, fileName: "business-workflow.txt" };
 
       const response = await fetch(apiUrl("/qvac/analyze-payment"), {
         method: "POST",
@@ -399,7 +426,7 @@ export default function App() {
       setReceipt(null);
       setTxSignature("");
       rememberAnalysis(data);
-      setMessage("Hosted API unavailable, so CloakPay ran the payment firewall in your browser.");
+      setMessage("Hosted API unavailable, so CloakPay ran the private desk analysis in your browser.");
     } finally {
       setBusy(false);
     }
@@ -564,12 +591,12 @@ export default function App() {
           <div className="section-inner">
             <header className="view-header">
               <div>
-                <small>Product preview</small>
-                <h1>Start Here</h1>
-                <p>No wallet needed for the first run. Load a sample invoice, see the risk decision, then connect a wallet only when the payment looks right.</p>
+                <small>Private business OS</small>
+                <h1>CloakPay AI Desk</h1>
+                <p>One local workspace for deals, merchant receipts, wallet checks, and payroll. QVAC keeps the business context on-device; Solana receives only the signed proof or payment.</p>
               </div>
               <div className="status-pill">
-                <small>Current Status</small>
+                <small>Desk Status</small>
                 <strong>{message}</strong>
               </div>
             </header>
@@ -593,14 +620,19 @@ export default function App() {
             </section>
 
             <section className="user-guide" aria-label="First time guide">
-              <div>
-                <small>Start here</small>
-                <strong>Try the firewall before connecting a wallet.</strong>
-                <p>Use this first. It creates an analysis and receipt locally so a new user understands the flow immediately.</p>
-                <button type="button" disabled={busy} onClick={tryWithoutWallet}>
-                  Try Without Wallet
-                </button>
-              </div>
+              {toolWorkflows.map(([name, description, workflow]) => (
+                <div key={name}>
+                  <small>{name}</small>
+                  <strong>{description}</strong>
+                  <p>{name === "Legal Desk" ? "Best first run for judges: local deal analysis, proof receipt, then optional wallet signing." : "Loads a real local workflow into the same QVAC analysis and receipt rail."}</p>
+                  <button type="button" disabled={busy} onClick={() => (name === "Legal Desk" ? tryWithoutWallet() : loadSample(workflow))}>
+                    {name === "Legal Desk" ? "Run Legal Desk" : `Open ${name}`}
+                  </button>
+                </div>
+              ))}
+            </section>
+
+            <section className="operator-strip" aria-label="Operator controls">
               <div>
                 <small>User account</small>
                 <strong>{profile ? profile.name : "Create local profile"}</strong>
@@ -622,7 +654,7 @@ export default function App() {
               <div>
                 <small>Feedback</small>
                 <strong>Help shape the real product.</strong>
-                <p>Send bugs, wallet issues, confusing screens, or invoice cases we should support next.</p>
+                <p>Send bugs, wallet issues, confusing screens, or business cases we should support next.</p>
                 <div className="mini-actions">
                   <a href={feedbackUrl} target="_blank" rel="noreferrer">
                     GitHub Issue
@@ -638,15 +670,11 @@ export default function App() {
 
         <section id="firewall" className="app-section firewall-section">
           <div className="section-inner">
-            <header className="view-header">
+            <header className="view-header single-column">
               <div>
-                <small>Firewall</small>
-                <h1>Payment Check</h1>
-                <p>Extract the payment details, score invoice risk, review the intent, sign only when it is clear, then save a privacy receipt.</p>
-              </div>
-              <div className="status-pill">
-                <small>Decision</small>
-                <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
+                <small>Main workflow</small>
+                <h1>Legal Desk</h1>
+                <p>Describe a deal in plain English. CloakPay AI turns it into a local contract-style payment intent, checks the counterparty context, prepares wallet proof, and saves a private receipt.</p>
               </div>
             </header>
 
@@ -654,7 +682,7 @@ export default function App() {
               <section className="panel input-panel">
                 <div className="panel-header">
                   <span>1</span>
-                  <h2>Payment Input</h2>
+                  <h2>Business Input</h2>
                 </div>
                 <label className="dropzone">
                   <input
@@ -662,26 +690,29 @@ export default function App() {
                     accept="image/*"
                     onChange={(event) => onFileSelected(event.target.files?.[0] ?? null)}
                   />
-                  {imagePreview ? <img src={imagePreview} alt="Payment upload preview" /> : <strong>Upload invoice image</strong>}
+                  {imagePreview ? <img src={imagePreview} alt="Business document upload preview" /> : <strong>Upload business document</strong>}
                 </label>
-                <div className="sample-row sample-row-3">
-                  <button type="button" disabled={busy} onClick={() => loadSample(safeInvoice)}>
-                    Safe SOL
+                <div className="sample-row">
+                  <button type="button" disabled={busy} onClick={() => loadSample(legalBrief)}>
+                    Legal
                   </button>
-                  <button type="button" disabled={busy} onClick={() => loadSample(usdtInvoice)} className="usdt-sample-btn">
-                    Safe USDT
+                  <button type="button" disabled={busy} onClick={() => loadSample(merchantBrief)}>
+                    Merchant
                   </button>
-                  <button type="button" disabled={busy} onClick={() => loadSample(suspiciousInvoice)}>
-                    Risky Sample
+                  <button type="button" disabled={busy} onClick={() => loadSample(walletLensBrief)}>
+                    Lens
+                  </button>
+                  <button type="button" disabled={busy} onClick={() => loadSample(payrollBrief)}>
+                    Payroll
                   </button>
                 </div>
                 <textarea value={invoiceText} onChange={(event) => setInvoiceText(event.target.value)} />
                 <div className="button-row">
                   <button disabled={busy} onClick={() => analyzePayment(true)}>
-                    Run Sample
+                    Run Workflow
                   </button>
                   <button disabled={busy || (!file && !invoiceText.trim())} onClick={() => analyzePayment(false)}>
-                    Analyze
+                    Analyze File/Text
                   </button>
                 </div>
               </section>
@@ -689,7 +720,7 @@ export default function App() {
               <section className="panel analysis-panel">
                 <div className="panel-header">
                   <span>2</span>
-                  <h2>QVAC Analysis</h2>
+                  <h2>QVAC Local Analysis</h2>
                 </div>
 
                 <div className="qvac-engine-bar">
@@ -741,7 +772,7 @@ export default function App() {
               <section className={`panel risk-panel ${riskClass}`}>
                 <div className="panel-header">
                   <span>3</span>
-                  <h2>Risk Decision</h2>
+                  <h2>Trust Decision</h2>
                 </div>
                 <div className="risk-score">
                   <small>Verdict</small>
@@ -764,7 +795,7 @@ export default function App() {
               <section className="panel review-panel">
                 <div className="panel-header">
                   <span>4</span>
-                  <h2>Intent Review</h2>
+                  <h2>Deal Review</h2>
                 </div>
                 <label>
                   Merchant
@@ -900,7 +931,7 @@ export default function App() {
                       <p>{receipt.redactedSummary}</p>
                     </div>
                     <div className="receipt-block">
-                      <small>Invoice hash</small>
+                      <small>Business hash</small>
                       <code>{receipt.invoiceHash}</code>
                     </div>
                     <div className="receipt-block">
@@ -913,7 +944,7 @@ export default function App() {
                     </div>
                   </div>
                 ) : (
-                  <p className="muted">Receipt will prove what was checked without exposing private invoice text.</p>
+                  <p className="muted">Receipt will prove what was checked without exposing private business text.</p>
                 )}
                 <div className="feedback-footer">
                   <a href={feedbackUrl} target="_blank" rel="noreferrer">
@@ -930,8 +961,8 @@ export default function App() {
             <header className="view-header">
               <div>
                 <small>Readiness</small>
-                <h1>Operations</h1>
-                <p>Mainnet mode, wallet accounts, monitor logs, support paths, and exportable user history are available in the product.</p>
+                <h1>Offline Merchant</h1>
+                <p>Create product lookup, pricing, and receipt context locally. The operator can export the receipt now and prepare settlement when internet and wallet access are available.</p>
               </div>
               <div className="status-pill">
                 <small>Mainnet</small>
@@ -941,8 +972,8 @@ export default function App() {
 
             <section className="readiness-board" aria-label="Production readiness">
               <div className="section-heading">
-                <small>Production path</small>
-                <h2>Mainnet is available, but the product still forces user confirmation before real SOL can move.</h2>
+                <small>Four pillars</small>
+                <h2>Every workflow stays local first, then connects to Solana only when a proof or payment is ready.</h2>
               </div>
               <div className="readiness-grid">
                 {productionReadiness.map(([label, value]) => (
@@ -961,8 +992,8 @@ export default function App() {
             <header className="view-header single-column">
               <div>
                 <small>History</small>
-                <h1>History</h1>
-                <p>Browser-only records for analyses, receipts, account details, and transaction proof.</p>
+                <h1>Wallet Lens</h1>
+                <p>Review counterparties before you deal, then keep browser-only records for analyses, receipts, account details, and transaction proof.</p>
               </div>
             </header>
 
@@ -1016,8 +1047,8 @@ export default function App() {
             <header className="view-header single-column">
               <div>
                 <small>Feedback</small>
-                <h1>Support</h1>
-                <p>Capture user issues, wallet friction, invoice formats, and mainnet requests without adding a paid backend.</p>
+                <h1>Payroll</h1>
+                <p>Validate payout rows locally, flag issues, prepare the payment intent, and capture support requests without adding a paid backend.</p>
               </div>
             </header>
 
@@ -1031,7 +1062,7 @@ export default function App() {
                 <select value={feedbackCategory} onChange={(event) => setFeedbackCategory(event.target.value as FeedbackCategory)}>
                   <option value="bug">Bug</option>
                   <option value="wallet">Wallet signing</option>
-                  <option value="invoice">Invoice parsing</option>
+                  <option value="invoice">Business document parsing</option>
                   <option value="risk">Risk verdict</option>
                   <option value="mainnet">Mainnet request</option>
                   <option value="other">Other</option>

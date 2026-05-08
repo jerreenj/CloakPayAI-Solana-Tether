@@ -78,11 +78,11 @@ export const WordsPullUpMultiStyle = ({ segments, className = "", style }: Words
 };
 
 const navItems = [
-  { label: "Demo", href: "#demo" },
-  { label: "Firewall", href: "#firewall" },
-  { label: "Readiness", href: "#readiness" },
-  { label: "History", href: "#history" },
-  { label: "Feedback", href: "#feedback" }
+  { label: "Desk", href: "#demo" },
+  { label: "Legal", href: "#firewall" },
+  { label: "Merchant", href: "#readiness" },
+  { label: "Lens", href: "#history" },
+  { label: "Payroll", href: "#feedback" }
 ];
 
 const heroVideo =
@@ -115,12 +115,12 @@ const PrismaHero = () => {
 
           <div className="prisma-hero-side">
             <p>
-              A local-first QVAC Tether payment firewall for Solana payments. Check invoice risk before a wallet signs, then
-              choose devnet or mainnet-beta SOL mode when the intent is clear.
+              Your private business operating system on Solana. Draft deals, inspect wallets, build payroll, and prepare
+              payment proof locally with QVAC before anything reaches the chain.
             </p>
 
             <a href="#firewall" className="prisma-hero-cta">
-              Go to app
+              Open desk
               <span>
                 <ArrowRight aria-hidden="true" />
               </span>
