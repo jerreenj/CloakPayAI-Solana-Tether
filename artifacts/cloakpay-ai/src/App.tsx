@@ -54,6 +54,23 @@ const networkLabels: Record<NetworkCluster, string> = {
   "mainnet-beta": "Mainnet-Beta"
 };
 
+type DeskView = "overview" | "legal" | "merchant" | "lens" | "payroll" | "records" | "support";
+
+const deskNavigation: Array<{ id: DeskView; label: string; kicker: string }> = [
+  { id: "overview", label: "Command", kicker: "Start" },
+  { id: "legal", label: "Legal Desk", kicker: "Main" },
+  { id: "merchant", label: "Merchant", kicker: "Offline" },
+  { id: "lens", label: "Wallet Lens", kicker: "Trust" },
+  { id: "payroll", label: "Payroll", kicker: "Batch" },
+  { id: "records", label: "Records", kicker: "Local" },
+  { id: "support", label: "Support", kicker: "Loop" }
+];
+
+function viewFromHash(hash: string): DeskView {
+  const value = hash.replace("#", "") as DeskView;
+  return deskNavigation.some((item) => item.id === value) ? value : "overview";
+}
+
 const productDescription = "your private business operating system on Solana.";
 
 const legalBrief = `Tool: Legal Desk
@@ -200,6 +217,9 @@ export default function App() {
   const [feedbackEmail, setFeedbackEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Ready for private business analysis.");
+  const [activeView, setActiveView] = useState<DeskView>(() =>
+    typeof window === "undefined" ? "overview" : viewFromHash(window.location.hash)
+  );
 
   useEffect(() => {
     fetch(apiUrl("/qvac/status"))
@@ -219,6 +239,20 @@ export default function App() {
         });
         setMessage("Local browser analysis is active.");
       });
+  }, []);
+
+  useEffect(() => {
+    const syncHash = () => {
+      const nextView = viewFromHash(window.location.hash);
+      setActiveView(nextView);
+      if (window.location.hash) {
+        window.setTimeout(() => document.getElementById("desk")?.scrollIntoView({ behavior: "auto", block: "start" }), 0);
+      }
+    };
+
+    syncHash();
+    window.addEventListener("hashchange", syncHash);
+    return () => window.removeEventListener("hashchange", syncHash);
   }, []);
 
   const riskClass = analysis?.riskReport.verdict ?? "pending";
@@ -277,6 +311,17 @@ export default function App() {
     });
     return `${feedbackUrl}?${params.toString()}`;
   }, [feedbackCategory, feedbackEmail, feedbackText]);
+
+  function openDesk(view: DeskView) {
+    setActiveView(view);
+    window.history.replaceState(null, "", `#${view}`);
+    document.getElementById("desk")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function loadWorkflow(view: DeskView, nextText: string) {
+    loadSample(nextText);
+    openDesk(view);
+  }
 
   async function onFileSelected(nextFile: File | null) {
     setFile(nextFile);
@@ -585,534 +630,403 @@ export default function App() {
     <main className="site-shell">
       <PrismaHero />
 
-      <section className="app-shell" aria-label="CloakPay AI product workspace">
-        <section id="desk" className="app-section demo-section">
-          <div className="section-inner">
-            <header className="view-header">
-              <div>
-                <small>Private business OS</small>
-                <h1>CloakPay AI Desk</h1>
-                <p>One local workspace for deals, merchant receipts, wallet checks, and payroll. QVAC keeps the business context on-device; Solana receives only the signed proof or payment.</p>
-              </div>
-              <div className="status-pill">
-                <small>Desk Status</small>
-                <strong>{message}</strong>
-              </div>
-            </header>
+      <div className="console-anchor-stack" aria-hidden="true">
+        {deskNavigation.map((item) => (
+          <span key={item.id} id={item.id} />
+        ))}
+      </div>
 
-            <section className="stack-strip">
-              {stackStatus.map(([label, value]) => (
-                <div key={label}>
-                  <small>{label}</small>
-                  <strong>{value}</strong>
-                </div>
-              ))}
-            </section>
-
-            <section className="flow-rail" aria-label="CloakPay workflow">
-              {["Input", "Analyze", "Decide", "Review", "Sign", "Receipt"].map((step, index) => (
-                <div key={step} className={index < 2 || analysis ? "active" : ""}>
-                  <span>{index + 1}</span>
-                  <strong>{step}</strong>
-                </div>
-              ))}
-            </section>
-
-            <section className="user-guide" aria-label="First time guide">
-              {toolWorkflows.map(([name, description, workflow]) => (
-                <div key={name}>
-                  <small>{name}</small>
-                  <strong>{description}</strong>
-                  <p>{name === "Legal Desk" ? "Best first run for judges: local deal analysis, proof receipt, then optional wallet signing." : "Loads a real local workflow into the same QVAC analysis and receipt rail."}</p>
-                  <button type="button" disabled={busy} onClick={() => (name === "Legal Desk" ? tryWithoutWallet() : loadSample(workflow))}>
-                    {name === "Legal Desk" ? "Run Legal Desk" : `Open ${name}`}
-                  </button>
-                </div>
-              ))}
-            </section>
-
-            <section className="operator-strip" aria-label="Operator controls">
-              <div>
-                <small>User account</small>
-                <strong>{profile ? profile.name : "Create local profile"}</strong>
-                <p>Save a free wallet-linked operator profile, then export account history before submission or user testing.</p>
-                <input value={accountName} onChange={(event) => setAccountName(event.target.value)} placeholder="Name" />
-                <input value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="Email or support contact" />
-                <button type="button" onClick={saveAccount}>
-                  Save Account
-                </button>
-              </div>
-              <div>
-                <small>Wallet testers</small>
-                <strong>Mainnet-ready with a real-funds gate.</strong>
-                  <p>Mainnet-beta is the real rail. Use the optional test rail only when a tester refuses to move funds.</p>
-                <a href={faucetUrl} target="_blank" rel="noreferrer">
-                  Get Test SOL
-                </a>
-              </div>
-              <div>
-                <small>Feedback</small>
-                <strong>Help shape the real product.</strong>
-                <p>Send bugs, wallet issues, confusing screens, or business cases we should support next.</p>
-                <div className="mini-actions">
-                  <a href={feedbackUrl} target="_blank" rel="noreferrer">
-                    GitHub Issue
-                  </a>
-                  <a href={supportEmail}>
-                    Email Support
-                  </a>
-                </div>
-              </div>
-            </section>
+      <section id="desk" className="app-shell product-console" aria-label="CloakPay AI product workspace">
+        <aside className="desk-sidebar" aria-label="CloakPay navigation">
+          <div className="desk-brand">
+            <small>CloakPay AI</small>
+            <strong>Private business OS</strong>
+            <p>Deals, receipts, wallet checks, and payroll in one local-first Solana desk.</p>
           </div>
-        </section>
 
-        <section id="firewall" className="app-section firewall-section">
-          <div className="section-inner">
-            <header className="view-header single-column">
-              <div>
-                <small>Main workflow</small>
-                <h1>Legal Desk</h1>
-                <p>Describe a deal in plain English. CloakPay AI turns it into a local contract-style payment intent, checks the counterparty context, prepares wallet proof, and saves a private receipt.</p>
+          <nav className="desk-nav">
+            {deskNavigation.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                className={activeView === item.id ? "active" : ""}
+                onClick={() => openDesk(item.id)}
+              >
+                <span>{item.kicker}</span>
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="desk-sidebar-card">
+            <small>Current rail</small>
+            <strong>{networkLabels[network]}</strong>
+            <p>{walletAddress ? formatAddress(walletAddress) : "Wallet not connected"}</p>
+          </div>
+        </aside>
+
+        <section className="desk-stage">
+          <header className="desk-topbar">
+            <div>
+              <small>Live workspace</small>
+              <h1>
+                {activeView === "overview" && "Command center"}
+                {activeView === "legal" && "Legal Desk"}
+                {activeView === "merchant" && "Offline Merchant"}
+                {activeView === "lens" && "Wallet Lens"}
+                {activeView === "payroll" && "Payroll"}
+                {activeView === "records" && "Local Records"}
+                {activeView === "support" && "Feedback Loop"}
+              </h1>
+              <p>{message}</p>
+            </div>
+            <div className="desk-status">
+              <small>QVAC</small>
+              <strong>{qvacStatus?.mode === "live-qvac" ? "Live Local" : "Browser Fallback"}</strong>
+              <span>No paid cloud AI</span>
+            </div>
+          </header>
+
+          <section className="stack-strip console-metrics">
+            {stackStatus.map(([label, value]) => (
+              <div key={label}>
+                <small>{label}</small>
+                <strong>{value}</strong>
               </div>
-            </header>
+            ))}
+          </section>
 
-            <div className="console-grid">
-              <section className="panel input-panel">
-                <div className="panel-header">
-                  <span>1</span>
-                  <h2>Business Input</h2>
-                </div>
-                <label className="dropzone">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(event) => onFileSelected(event.target.files?.[0] ?? null)}
-                  />
-                  {imagePreview ? <img src={imagePreview} alt="Business document upload preview" /> : <strong>Upload business document</strong>}
-                </label>
-                <div className="sample-row">
-                  <button type="button" disabled={busy} onClick={() => loadSample(legalBrief)}>
-                    Legal
-                  </button>
-                  <button type="button" disabled={busy} onClick={() => loadSample(merchantBrief)}>
-                    Merchant
-                  </button>
-                  <button type="button" disabled={busy} onClick={() => loadSample(walletLensBrief)}>
-                    Lens
-                  </button>
-                  <button type="button" disabled={busy} onClick={() => loadSample(payrollBrief)}>
-                    Payroll
-                  </button>
-                </div>
-                <textarea value={invoiceText} onChange={(event) => setInvoiceText(event.target.value)} />
+          {activeView === "overview" && (
+            <div className="desk-page overview-page">
+              <section className="overview-hero-panel">
+                <small>Start here</small>
+                <h2>One private operating desk before the wallet signs.</h2>
+                <p>
+                  Choose a business workflow, let CloakPay extract and score the intent locally, then prepare the real
+                  Solana transaction only after review.
+                </p>
                 <div className="button-row">
-                  <button disabled={busy} onClick={() => analyzePayment(true)}>
-                    Run Workflow
+                  <button type="button" disabled={busy} onClick={() => openDesk("legal")}>
+                    Open Legal Desk
                   </button>
-                  <button disabled={busy || (!file && !invoiceText.trim())} onClick={() => analyzePayment(false)}>
-                    Analyze File/Text
+                  <button type="button" disabled={busy} onClick={tryWithoutWallet}>
+                    Run Without Wallet
                   </button>
                 </div>
               </section>
 
-              <section className="panel analysis-panel">
-                <div className="panel-header">
-                  <span>2</span>
-                  <h2>QVAC Local Analysis</h2>
-                </div>
-
-                <div className="qvac-engine-bar">
-                  <span className={`qvac-mode-badge ${analysis?.mode ?? (qvacStatus?.mode === "live-qvac" ? "qvac" : "fallback")}`}>
-                    {analysis?.mode === "qvac" ? "Live QVAC" : qvacStatus?.mode === "live-qvac" ? "Live QVAC" : "Browser Fallback"}
-                  </span>
-                  <span className="qvac-model-label">{analysis?.qvacStats.ocrModel ?? qvacStatus?.ocrModel ?? "—"}</span>
-                  <span className="qvac-runtime">{analysis ? `${analysis.qvacStats.processingMs}ms` : "Idle"}</span>
-                  <span className="qvac-local-badge">Local only · No cloud</span>
-                </div>
-
-                <div className="qvac-blocks-section">
-                  <small>OCR Blocks Extracted</small>
-                  <div className="qvac-blocks">
-                    {(analysis?.blocks ?? []).map((block, index) => (
-                      <div key={`${block.text}-${index}`} className="qvac-block-item">
-                        <span className="qvac-block-text">{block.text}</span>
-                        {block.confidence !== undefined && (
-                          <span className="qvac-confidence-badge">{Math.round(block.confidence * 100)}%</span>
-                        )}
-                      </div>
-                    ))}
-                    {!analysis && <p className="muted">OCR block extraction results will appear here after analysis.</p>}
-                  </div>
-                </div>
-
-                {analysis?.intent.sourceFields && analysis.intent.sourceFields.length > 0 && (
-                  <div className="qvac-fields-section">
-                    <small>Field Extraction Confidence</small>
-                    <div className="qvac-source-fields">
-                      {analysis.intent.sourceFields.map((f) => (
-                        <div key={f.field} className="qvac-field-row">
-                          <span className="qvac-field-name">{f.field}</span>
-                          <span className="qvac-field-value">{f.value.length > 20 ? `${f.value.slice(0, 18)}…` : f.value}</span>
-                          <div className="qvac-bar-wrap">
-                            <div
-                              className="qvac-bar-fill"
-                              style={{ width: `${Math.round(f.confidence * 100)}%`, background: f.confidence >= 0.8 ? "#2f8c61" : f.confidence >= 0.5 ? "#d99e26" : "#e05050" }}
-                            />
-                          </div>
-                          <span className="qvac-field-pct">{Math.round(f.confidence * 100)}%</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <section className="workflow-grid" aria-label="CloakPay workflows">
+                <button type="button" onClick={() => loadWorkflow("legal", legalBrief)}>
+                  <small>Main</small>
+                  <strong>Legal Desk</strong>
+                  <span>Draft agreement intent, risk-check it, and prepare wallet proof.</span>
+                </button>
+                <button type="button" onClick={() => loadWorkflow("merchant", merchantBrief)}>
+                  <small>Offline</small>
+                  <strong>Merchant</strong>
+                  <span>Generate receipt context locally and settle when online.</span>
+                </button>
+                <button type="button" onClick={() => loadWorkflow("lens", walletLensBrief)}>
+                  <small>Trust</small>
+                  <strong>Wallet Lens</strong>
+                  <span>Check counterparty context before you sign.</span>
+                </button>
+                <button type="button" onClick={() => loadWorkflow("payroll", payrollBrief)}>
+                  <small>Batch</small>
+                  <strong>Payroll</strong>
+                  <span>Validate payout rows and prepare the batch intent.</span>
+                </button>
               </section>
 
-              <section className={`panel risk-panel ${riskClass}`}>
-                <div className="panel-header">
-                  <span>3</span>
-                  <h2>Trust Decision</h2>
+              <section className="operator-strip console-operator" aria-label="Operator controls">
+                <div>
+                  <small>User account</small>
+                  <strong>{profile ? profile.name : "Create local profile"}</strong>
+                  <input value={accountName} onChange={(event) => setAccountName(event.target.value)} placeholder="Name" />
+                  <input value={accountEmail} onChange={(event) => setAccountEmail(event.target.value)} placeholder="Email or support contact" />
+                  <button type="button" onClick={saveAccount}>Save Account</button>
                 </div>
-                <div className="risk-score">
-                  <small>Verdict</small>
-                  <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
-                  <b>{analysis?.riskReport.score ?? 0}/100</b>
+                <div>
+                  <small>Mainnet</small>
+                  <strong>Real funds gate</strong>
+                  <p>Mainnet-beta is available only after explicit confirmation in the signing view.</p>
+                  <button type="button" onClick={() => openDesk("legal")}>Review Signing</button>
                 </div>
-                <p className="explanation">{analysis?.riskReport.explanation ?? "Run analysis to score the payment."}</p>
-                <div className="warnings">
-                  {(analysis?.riskReport.warnings ?? []).map((warning) => (
-                    <p key={warning}>{warning}</p>
-                  ))}
-                </div>
-                <div className="evidence-list">
-                  {(analysis?.riskReport.evidence ?? []).map((item) => (
-                    <code key={item}>{item}</code>
-                  ))}
-                </div>
-              </section>
-
-              <section className="panel review-panel">
-                <div className="panel-header">
-                  <span>4</span>
-                  <h2>Deal Review</h2>
-                </div>
-                <label>
-                  Merchant
-                  <input value={intent?.merchant ?? ""} onChange={(event) => intent && setIntent({ ...intent, merchant: event.target.value })} />
-                </label>
-                <label>
-                  Recipient
-                  <input
-                    value={intent?.recipientAddress ?? ""}
-                    onChange={(event) => intent && setIntent({ ...intent, recipientAddress: event.target.value })}
-                  />
-                </label>
-                <label>
-                  Amount
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.001"
-                    value={intent?.amount ?? ""}
-                    onChange={(event) => intent && setIntent({ ...intent, amount: Number(event.target.value) })}
-                  />
-                </label>
-                <label>
-                  Token
-                  <select
-                    value={intent?.token ?? "SOL"}
-                    onChange={(event) => intent && setIntent({ ...intent, token: event.target.value as PaymentIntent["token"] })}
-                  >
-                    <option>SOL</option>
-                    <option>USDT</option>
-                    <option>UNKNOWN</option>
-                  </select>
-                </label>
-                <label>
-                  Memo
-                  <input value={intent?.memo ?? ""} onChange={(event) => intent && setIntent({ ...intent, memo: event.target.value })} />
-                </label>
-              </section>
-
-              <section className="panel wallet-panel">
-                <div className="panel-header">
-                  <span>5</span>
-                  <h2>Sign Payment</h2>
-                </div>
-                <div className="safety-banner">
-                  {intent?.token === "USDT"
-                    ? "USDT SPL token transfer. Mainnet-beta routes to real Tether USDT (Es9vMF...). Real funds."
-                    : "Mainnet-beta uses real SOL. Confirm before signing. The test rail is optional for public testers."}
-                </div>
-                <label className="network-control">
-                  Network
-                  <select
-                    value={network}
-                    onChange={(event) => {
-                      const nextNetwork = event.target.value as NetworkCluster;
-                      setNetwork(nextNetwork);
-                      setPrepared(null);
-                      setTxSignature("");
-                      setMainnetAcknowledged(false);
-                      logEvent("info", "wallet", `Network switched to ${networkLabels[nextNetwork]}.`);
-                    }}
-                  >
-                    <option value="devnet">Testnet</option>
-                    <option value="mainnet-beta">Mainnet-Beta</option>
-                  </select>
-                </label>
-                {network === "mainnet-beta" && (
-                  <label className="mainnet-check">
-                    <input
-                      type="checkbox"
-                      checked={mainnetAcknowledged}
-                      onChange={(event) => setMainnetAcknowledged(event.target.checked)}
-                    />
-                    I understand this prepares a real mainnet {intent?.token === "USDT" ? "USDT" : "SOL"} transaction with real funds.
-                  </label>
-                )}
-                <div className="receipt-block">
-                  <small>Wallet</small>
-                  <strong>{formatAddress(walletAddress)}</strong>
-                </div>
-                <button disabled={busy || Boolean(walletAddress)} onClick={connectWallet}>
-                  Connect Wallet
-                </button>
-                <button
-                  disabled={
-                    busy ||
-                    !intent ||
-                    !walletAddress ||
-                    analysis?.riskReport.verdict === "block" ||
-                    (network === "mainnet-beta" && !mainnetAcknowledged)
-                  }
-                  onClick={prepareTransaction}
-                >
-                  {intent?.token === "USDT"
-                    ? `Prepare ${networkLabels[network]} USDT`
-                    : `Prepare ${networkLabels[network]} SOL`}
-                </button>
-                <button disabled={busy || !canSend} onClick={signAndSend}>
-                  Sign And Send
-                </button>
-                {prepared && (
-                  <div className="receipt-block">
-                    <small>Prepared {prepared.token ?? "SOL"} transfer</small>
-                    {prepared.token === "USDT" ? (
-                      <>
-                        <p>{prepared.usdtAmount} USDT → {formatAddress(prepared.to)}</p>
-                        {prepared.toATA && <p className="muted" style={{ fontSize: "0.72rem" }}>Token account: {formatAddress(prepared.toATA)}</p>}
-                      </>
-                    ) : (
-                      <p>{prepared.lamports} lamports → {formatAddress(prepared.to)}</p>
-                    )}
-                  </div>
-                )}
-                {txSignature && prepared && (
-                  <a href={explorerTxUrl(txSignature, prepared.network)} target="_blank" rel="noreferrer">
-                    View {networkLabels[prepared.network]} transaction
-                  </a>
-                )}
-              </section>
-
-              <section className="panel receipt-panel">
-                <div className="panel-header">
-                  <span>6</span>
-                  <h2>Privacy Receipt</h2>
-                </div>
-                <button disabled={busy || !intent} onClick={createReceipt}>
-                  Create Receipt
-                </button>
-                {receipt ? (
-                  <div className="receipt-stack">
-                    <div className="receipt-block">
-                      <small>Redacted summary</small>
-                      <p>{receipt.redactedSummary}</p>
-                    </div>
-                    <div className="receipt-block">
-                      <small>Business hash</small>
-                      <code>{receipt.invoiceHash}</code>
-                    </div>
-                    <div className="receipt-block">
-                      <small>Commitment</small>
-                      <code>{receipt.commitment}</code>
-                    </div>
-                    <div className="receipt-block">
-                      <small>Nullifier preview</small>
-                      <code>{receipt.nullifierHash}</code>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="muted">Receipt will prove what was checked without exposing private business text.</p>
-                )}
-                <div className="feedback-footer">
-                  <a href={feedbackUrl} target="_blank" rel="noreferrer">
-                    Report issue or request feature
-                  </a>
+                <div>
+                  <small>Support</small>
+                  <strong>Fast feedback loop</strong>
+                  <p>Capture user feedback locally, export it, or open a GitHub issue.</p>
+                  <button type="button" onClick={() => openDesk("support")}>Open Support</button>
                 </div>
               </section>
             </div>
-          </div>
-        </section>
+          )}
 
-        <section id="readiness" className="app-section readiness-section">
-          <div className="section-inner">
-            <header className="view-header">
-              <div>
-                <small>Readiness</small>
-                <h1>Offline Merchant</h1>
-                <p>Create product lookup, pricing, and receipt context locally. The operator can export the receipt now and prepare settlement when internet and wallet access are available.</p>
-              </div>
-              <div className="status-pill">
-                <small>Mainnet</small>
-                <strong>Enabled with explicit real-funds confirmation.</strong>
-              </div>
-            </header>
-
-            <section className="readiness-board" aria-label="Production readiness">
-              <div className="section-heading">
-                <small>Four pillars</small>
-                <h2>Every workflow stays local first, then connects to Solana only when a proof or payment is ready.</h2>
-              </div>
-              <div className="readiness-grid">
-                {productionReadiness.map(([label, value]) => (
-                  <div key={label}>
-                    <strong>{label}</strong>
-                    <p>{value}</p>
+          {activeView === "legal" && (
+            <div className="desk-page legal-page">
+              <section className="flow-rail compact-flow" aria-label="CloakPay workflow">
+                {["Input", "Analyze", "Decide", "Review", "Sign", "Receipt"].map((step, index) => (
+                  <div key={step} className={index < 2 || analysis ? "active" : ""}>
+                    <span>{index + 1}</span>
+                    <strong>{step}</strong>
                   </div>
                 ))}
-              </div>
-            </section>
-          </div>
-        </section>
+              </section>
 
-        <section id="history" className="app-section history-section">
-          <div className="section-inner narrow-section">
-            <header className="view-header single-column">
-              <div>
-                <small>History</small>
-                <h1>Wallet Lens</h1>
-                <p>Review counterparties before you deal, then keep browser-only records for analyses, receipts, account details, and transaction proof.</p>
-              </div>
-            </header>
+              <div className="console-grid product-grid">
+                <section className="panel input-panel">
+                  <div className="panel-header">
+                    <span>1</span>
+                    <h2>Business Input</h2>
+                  </div>
+                  <label className="dropzone">
+                    <input type="file" accept="image/*" onChange={(event) => onFileSelected(event.target.files?.[0] ?? null)} />
+                    {imagePreview ? <img src={imagePreview} alt="Business document upload preview" /> : <strong>Upload business document</strong>}
+                  </label>
+                  <div className="sample-row">
+                    <button type="button" disabled={busy} onClick={() => loadSample(legalBrief)}>Legal</button>
+                    <button type="button" disabled={busy} onClick={() => loadSample(merchantBrief)}>Merchant</button>
+                    <button type="button" disabled={busy} onClick={() => loadSample(walletLensBrief)}>Lens</button>
+                    <button type="button" disabled={busy} onClick={() => loadSample(payrollBrief)}>Payroll</button>
+                  </div>
+                  <textarea value={invoiceText} onChange={(event) => setInvoiceText(event.target.value)} />
+                  <div className="button-row">
+                    <button disabled={busy} onClick={() => analyzePayment(true)}>Run Workflow</button>
+                    <button disabled={busy || (!file && !invoiceText.trim())} onClick={() => analyzePayment(false)}>Analyze File/Text</button>
+                  </div>
+                </section>
 
-            <section className="panel history-panel">
-              <div className="panel-header">
-                <span>7</span>
-                <h2>History</h2>
-              </div>
-              <p className="muted">
-                Account: {profile?.name ?? "Not saved"} {profile?.walletAddress ? `· ${formatAddress(profile.walletAddress)}` : ""}. This profile lives in this browser unless exported.
-              </p>
-              <div className="history-list">
-                {history.map((item) => (
-                  <div key={item.id} className="history-item">
-                    <div>
-                      <strong>{item.merchant}</strong>
-                      <p>
-                      {item.amount} {item.token} · {item.network ? networkLabels[item.network] : "Testnet"} · {verdictLabel(item.verdict)} · {item.score}/100
-                      </p>
+                <section className="panel analysis-panel">
+                  <div className="panel-header">
+                    <span>2</span>
+                    <h2>QVAC Local Analysis</h2>
+                  </div>
+                  <div className="qvac-engine-bar">
+                    <span className={`qvac-mode-badge ${analysis?.mode ?? (qvacStatus?.mode === "live-qvac" ? "qvac" : "fallback")}`}>
+                      {analysis?.mode === "qvac" ? "Live QVAC" : qvacStatus?.mode === "live-qvac" ? "Live QVAC" : "Browser Fallback"}
+                    </span>
+                    <span className="qvac-model-label">{analysis?.qvacStats.ocrModel ?? qvacStatus?.ocrModel ?? "—"}</span>
+                    <span className="qvac-runtime">{analysis ? `${analysis.qvacStats.processingMs}ms` : "Idle"}</span>
+                    <span className="qvac-local-badge">Local only · No cloud</span>
+                  </div>
+                  <div className="qvac-blocks-section">
+                    <small>Extracted Blocks</small>
+                    <div className="qvac-blocks">
+                      {(analysis?.blocks ?? []).map((block, index) => (
+                        <div key={`${block.text}-${index}`} className="qvac-block-item">
+                          <span className="qvac-block-text">{block.text}</span>
+                          {block.confidence !== undefined && <span className="qvac-confidence-badge">{Math.round(block.confidence * 100)}%</span>}
+                        </div>
+                      ))}
+                      {!analysis && <p className="muted">Run analysis to see extracted business context.</p>}
                     </div>
-                    <small>{new Date(item.createdAt).toLocaleString()}</small>
-                    {item.txSignature && <code>{item.txSignature}</code>}
-                    {item.receiptCommitment && <code>{item.receiptCommitment}</code>}
                   </div>
-                ))}
-                {!history.length && <p className="muted">Run an analysis to create the first local history item.</p>}
-              </div>
-              <button type="button" disabled={!history.length} onClick={() => downloadJson("cloakpay-history.json", history)}>
-                Export History
-              </button>
-              <button type="button" disabled={!profile} onClick={() => downloadJson("cloakpay-account.json", profile)}>
-                Export Account
-              </button>
-              <button
-                type="button"
-                disabled={!profile}
-                onClick={() => {
-                  setProfile(clearProfile());
-                  logEvent("warn", "system", "Local account profile cleared.");
-                  setMessage("Local account profile cleared.");
-                }}
-              >
-                Clear Account
-              </button>
-            </section>
-          </div>
-        </section>
+                  {analysis?.intent.sourceFields && analysis.intent.sourceFields.length > 0 && (
+                    <div className="qvac-fields-section">
+                      <small>Field Confidence</small>
+                      <div className="qvac-source-fields">
+                        {analysis.intent.sourceFields.map((f) => (
+                          <div key={f.field} className="qvac-field-row">
+                            <span className="qvac-field-name">{f.field}</span>
+                            <span className="qvac-field-value">{f.value.length > 20 ? `${f.value.slice(0, 18)}...` : f.value}</span>
+                            <div className="qvac-bar-wrap">
+                              <div
+                                className="qvac-bar-fill"
+                                style={{
+                                  width: `${Math.round(f.confidence * 100)}%`,
+                                  background: f.confidence >= 0.8 ? "#2f8c61" : f.confidence >= 0.5 ? "#d99e26" : "#e05050"
+                                }}
+                              />
+                            </div>
+                            <span className="qvac-field-pct">{Math.round(f.confidence * 100)}%</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </section>
 
-        <section id="feedback" className="app-section feedback-section">
-          <div className="section-inner narrow-section">
-            <header className="view-header single-column">
-              <div>
-                <small>Feedback</small>
-                <h1>Payroll</h1>
-                <p>Validate payout rows locally, flag issues, prepare the payment intent, and capture support requests without adding a paid backend.</p>
-              </div>
-            </header>
+                <section className={`panel risk-panel ${riskClass}`}>
+                  <div className="panel-header">
+                    <span>3</span>
+                    <h2>Trust Decision</h2>
+                  </div>
+                  <div className="risk-score">
+                    <small>Verdict</small>
+                    <strong>{verdictLabel(analysis?.riskReport.verdict)}</strong>
+                    <b>{analysis?.riskReport.score ?? 0}/100</b>
+                  </div>
+                  <p className="explanation">{analysis?.riskReport.explanation ?? "Run analysis to score the payment."}</p>
+                  <div className="warnings">
+                    {(analysis?.riskReport.warnings ?? []).map((warning) => <p key={warning}>{warning}</p>)}
+                  </div>
+                  <div className="evidence-list">
+                    {(analysis?.riskReport.evidence ?? []).map((item) => <code key={item}>{item}</code>)}
+                  </div>
+                </section>
 
-            <section className="panel feedback-panel">
-              <div className="panel-header">
-                <span>8</span>
-                <h2>Feedback</h2>
+                <section className="panel review-panel">
+                  <div className="panel-header">
+                    <span>4</span>
+                    <h2>Deal Review</h2>
+                  </div>
+                  <label>Merchant<input value={intent?.merchant ?? ""} onChange={(event) => intent && setIntent({ ...intent, merchant: event.target.value })} /></label>
+                  <label>Recipient<input value={intent?.recipientAddress ?? ""} onChange={(event) => intent && setIntent({ ...intent, recipientAddress: event.target.value })} /></label>
+                  <label>Amount<input type="number" min="0" step="0.001" value={intent?.amount ?? ""} onChange={(event) => intent && setIntent({ ...intent, amount: Number(event.target.value) })} /></label>
+                  <label>
+                    Token
+                    <select value={intent?.token ?? "SOL"} onChange={(event) => intent && setIntent({ ...intent, token: event.target.value as PaymentIntent["token"] })}>
+                      <option>SOL</option>
+                      <option>USDT</option>
+                      <option>UNKNOWN</option>
+                    </select>
+                  </label>
+                  <label>Memo<input value={intent?.memo ?? ""} onChange={(event) => intent && setIntent({ ...intent, memo: event.target.value })} /></label>
+                </section>
+
+                <section className="panel wallet-panel">
+                  <div className="panel-header">
+                    <span>5</span>
+                    <h2>Sign Payment</h2>
+                  </div>
+                  <div className="safety-banner">
+                    {intent?.token === "USDT"
+                      ? "USDT SPL token transfer. Mainnet-beta routes to real Tether USDT (Es9vMF...). Real funds."
+                      : "Mainnet-beta uses real SOL. Confirm before signing. The test rail is optional for public testers."}
+                  </div>
+                  <label className="network-control">
+                    Network
+                    <select
+                      value={network}
+                      onChange={(event) => {
+                        const nextNetwork = event.target.value as NetworkCluster;
+                        setNetwork(nextNetwork);
+                        setPrepared(null);
+                        setTxSignature("");
+                        setMainnetAcknowledged(false);
+                        logEvent("info", "wallet", `Network switched to ${networkLabels[nextNetwork]}.`);
+                      }}
+                    >
+                      <option value="devnet">Testnet</option>
+                      <option value="mainnet-beta">Mainnet-Beta</option>
+                    </select>
+                  </label>
+                  {network === "mainnet-beta" && (
+                    <label className="mainnet-check">
+                      <input type="checkbox" checked={mainnetAcknowledged} onChange={(event) => setMainnetAcknowledged(event.target.checked)} />
+                      I understand this prepares a real mainnet {intent?.token === "USDT" ? "USDT" : "SOL"} transaction with real funds.
+                    </label>
+                  )}
+                  <div className="receipt-block">
+                    <small>Wallet</small>
+                    <strong>{formatAddress(walletAddress)}</strong>
+                  </div>
+                  <button disabled={busy || Boolean(walletAddress)} onClick={connectWallet}>Connect Wallet</button>
+                  <button disabled={busy || !intent || !walletAddress || analysis?.riskReport.verdict === "block" || (network === "mainnet-beta" && !mainnetAcknowledged)} onClick={prepareTransaction}>
+                    {intent?.token === "USDT" ? `Prepare ${networkLabels[network]} USDT` : `Prepare ${networkLabels[network]} SOL`}
+                  </button>
+                  <button disabled={busy || !canSend} onClick={signAndSend}>Sign And Send</button>
+                  {prepared && (
+                    <div className="receipt-block">
+                      <small>Prepared {prepared.token ?? "SOL"} transfer</small>
+                      {prepared.token === "USDT" ? (
+                        <>
+                          <p>{prepared.usdtAmount} USDT to {formatAddress(prepared.to)}</p>
+                          {prepared.toATA && <p className="muted">Token account: {formatAddress(prepared.toATA)}</p>}
+                        </>
+                      ) : (
+                        <p>{prepared.lamports} lamports to {formatAddress(prepared.to)}</p>
+                      )}
+                    </div>
+                  )}
+                  {txSignature && prepared && (
+                    <a href={explorerTxUrl(txSignature, prepared.network)} target="_blank" rel="noreferrer">
+                      View {networkLabels[prepared.network]} transaction
+                    </a>
+                  )}
+                </section>
+
+                <section className="panel receipt-panel">
+                  <div className="panel-header">
+                    <span>6</span>
+                    <h2>Privacy Receipt</h2>
+                  </div>
+                  <button disabled={busy || !intent} onClick={createReceipt}>Create Receipt</button>
+                  {receipt ? (
+                    <div className="receipt-stack">
+                      <div className="receipt-block"><small>Redacted summary</small><p>{receipt.redactedSummary}</p></div>
+                      <div className="receipt-block"><small>Business hash</small><code>{receipt.invoiceHash}</code></div>
+                      <div className="receipt-block"><small>Commitment</small><code>{receipt.commitment}</code></div>
+                      <div className="receipt-block"><small>Nullifier preview</small><code>{receipt.nullifierHash}</code></div>
+                    </div>
+                  ) : (
+                    <p className="muted">Receipt will prove what was checked without exposing private business text.</p>
+                  )}
+                </section>
               </div>
-              <label>
-                Category
-                <select value={feedbackCategory} onChange={(event) => setFeedbackCategory(event.target.value as FeedbackCategory)}>
-                  <option value="bug">Bug</option>
-                  <option value="wallet">Wallet signing</option>
-                  <option value="invoice">Business document parsing</option>
-                  <option value="risk">Risk verdict</option>
-                  <option value="mainnet">Mainnet request</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-              <label>
-                Email
-                <input value={feedbackEmail} onChange={(event) => setFeedbackEmail(event.target.value)} placeholder="Optional email, Telegram, or Discord" />
-              </label>
-              <label>
-                Feedback
-                <textarea
-                  value={feedbackText}
-                  onChange={(event) => setFeedbackText(event.target.value)}
-                  placeholder="What broke, confused you, or should be added before mainnet?"
-                />
-              </label>
-              <div className="button-row">
-                <button type="button" onClick={submitLocalFeedback}>
-                  Save Feedback
-                </button>
-                <button type="button" disabled={!feedbackItems.length} onClick={() => downloadJson("cloakpay-feedback.json", feedbackItems)}>
-                  Export Feedback
-                </button>
-              </div>
-              <a href={feedbackIssueUrl} target="_blank" rel="noreferrer">
-                Open GitHub Issue
-              </a>
-              <a href={supportEmail}>
-                Email Support
-              </a>
-              <button
-                type="button"
-                disabled={!feedbackItems.length}
-                onClick={() => {
-                  setFeedbackItems(clearFeedback());
-                  setMessage("Local feedback inbox cleared.");
-                }}
-              >
-                Clear Local Inbox
-              </button>
-              <div className="feedback-count">
-                <strong>{feedbackItems.length}</strong>
-                <span>Saved Local Feedback Item{feedbackItems.length === 1 ? "" : "s"}</span>
-              </div>
-              <div className="monitor-log">
-                <div className="panel-header">
-                  <span>9</span>
-                  <h2>Production Monitor</h2>
+            </div>
+          )}
+
+          {activeView === "merchant" && (
+            <div className="desk-page split-page">
+              <section className="overview-hero-panel">
+                <small>Offline Merchant</small>
+                <h2>Accept USDT intent anywhere, then settle when online.</h2>
+                <p>Create product lookup, pricing, and receipt context locally. The operator can export the receipt now and prepare settlement when internet and wallet access are available.</p>
+                <div className="button-row">
+                  <button type="button" onClick={() => loadWorkflow("legal", merchantBrief)}>Load Merchant Flow</button>
+                  <button type="button" onClick={() => openDesk("records")}>View Receipts</button>
                 </div>
-                <p className="muted">Local event trail for analysis, wallet, receipt, support, and system events.</p>
+              </section>
+              <section className="readiness-board">
+                <div className="section-heading"><small>Readiness</small><h2>Product surfaces that feel real to a merchant.</h2></div>
+                <div className="readiness-grid">
+                  {productionReadiness.map(([label, value]) => <div key={label}><strong>{label}</strong><p>{value}</p></div>)}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeView === "lens" && (
+            <div className="desk-page split-page">
+              <section className="overview-hero-panel">
+                <small>Wallet Lens</small>
+                <h2>Check the counterparty before the deal moves.</h2>
+                <p>Paste wallet context, review the business purpose, and keep a local trust report before any transaction is prepared.</p>
+                <div className="button-row">
+                  <button type="button" onClick={() => loadWorkflow("legal", walletLensBrief)}>Load Lens Flow</button>
+                  <button type="button" onClick={() => loadWorkflow("legal", riskyBrief)}>Load Risk Check</button>
+                </div>
+              </section>
+              <section className="panel history-panel">
+                <div className="panel-header"><span>7</span><h2>Recent Local Checks</h2></div>
+                <div className="history-list">
+                  {history.slice(0, 4).map((item) => (
+                    <div key={item.id} className="history-item">
+                      <strong>{item.merchant}</strong>
+                      <p>{item.amount} {item.token} · {verdictLabel(item.verdict)} · {item.score}/100</p>
+                      <small>{new Date(item.createdAt).toLocaleString()}</small>
+                    </div>
+                  ))}
+                  {!history.length && <p className="muted">Run a wallet or legal analysis to create a local record.</p>}
+                </div>
+              </section>
+            </div>
+          )}
+
+          {activeView === "payroll" && (
+            <div className="desk-page split-page">
+              <section className="overview-hero-panel">
+                <small>Payroll</small>
+                <h2>Validate payout rows before a batch is signed.</h2>
+                <p>Upload or paste team CSV-style rows, flag missing wallet/amount fields locally, then prepare a payment intent for review.</p>
+                <div className="button-row">
+                  <button type="button" onClick={() => loadWorkflow("legal", payrollBrief)}>Load Payroll Flow</button>
+                  <button type="button" onClick={() => openDesk("support")}>Open Support</button>
+                </div>
+              </section>
+              <section className="panel monitor-log">
+                <div className="panel-header"><span>8</span><h2>Production Monitor</h2></div>
                 <div className="history-list">
                   {monitorEvents.map((item) => (
                     <div key={item.id} className={`history-item monitor-${item.level}`}>
@@ -1123,24 +1037,70 @@ export default function App() {
                   ))}
                   {!monitorEvents.length && <p className="muted">Run the product flow to generate monitor events.</p>}
                 </div>
-                <div className="button-row">
-                  <button type="button" disabled={!monitorEvents.length} onClick={() => downloadJson("cloakpay-monitor-events.json", monitorEvents)}>
-                    Export Monitor
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!monitorEvents.length}
-                    onClick={() => {
-                      setMonitorEvents(clearMonitorEvents());
-                      setMessage("Local monitor log cleared.");
-                    }}
-                  >
-                    Clear Monitor
-                  </button>
+              </section>
+            </div>
+          )}
+
+          {activeView === "records" && (
+            <div className="desk-page records-page">
+              <section className="panel history-panel">
+                <div className="panel-header"><span>9</span><h2>Local Records</h2></div>
+                <p className="muted">Account: {profile?.name ?? "Not saved"} {profile?.walletAddress ? `· ${formatAddress(profile.walletAddress)}` : ""}. This profile lives in this browser unless exported.</p>
+                <div className="history-list">
+                  {history.map((item) => (
+                    <div key={item.id} className="history-item">
+                      <div>
+                        <strong>{item.merchant}</strong>
+                        <p>{item.amount} {item.token} · {item.network ? networkLabels[item.network] : "Testnet"} · {verdictLabel(item.verdict)} · {item.score}/100</p>
+                      </div>
+                      <small>{new Date(item.createdAt).toLocaleString()}</small>
+                      {item.txSignature && <code>{item.txSignature}</code>}
+                      {item.receiptCommitment && <code>{item.receiptCommitment}</code>}
+                    </div>
+                  ))}
+                  {!history.length && <p className="muted">Run an analysis to create the first local history item.</p>}
                 </div>
-              </div>
-            </section>
-          </div>
+                <div className="button-row">
+                  <button type="button" disabled={!history.length} onClick={() => downloadJson("cloakpay-history.json", history)}>Export History</button>
+                  <button type="button" disabled={!profile} onClick={() => downloadJson("cloakpay-account.json", profile)}>Export Account</button>
+                </div>
+                <button type="button" disabled={!profile} onClick={() => { setProfile(clearProfile()); logEvent("warn", "system", "Local account profile cleared."); setMessage("Local account profile cleared."); }}>Clear Account</button>
+              </section>
+            </div>
+          )}
+
+          {activeView === "support" && (
+            <div className="desk-page support-page">
+              <section className="panel feedback-panel">
+                <div className="panel-header"><span>10</span><h2>Feedback Loop</h2></div>
+                <label>
+                  Category
+                  <select value={feedbackCategory} onChange={(event) => setFeedbackCategory(event.target.value as FeedbackCategory)}>
+                    <option value="bug">Bug</option>
+                    <option value="wallet">Wallet signing</option>
+                    <option value="invoice">Business document parsing</option>
+                    <option value="risk">Risk verdict</option>
+                    <option value="mainnet">Mainnet request</option>
+                    <option value="other">Other</option>
+                  </select>
+                </label>
+                <label>Email<input value={feedbackEmail} onChange={(event) => setFeedbackEmail(event.target.value)} placeholder="Optional email, Telegram, or Discord" /></label>
+                <label>
+                  Feedback
+                  <textarea value={feedbackText} onChange={(event) => setFeedbackText(event.target.value)} placeholder="What broke, confused you, or should be added before mainnet?" />
+                </label>
+                <div className="button-row">
+                  <button type="button" onClick={submitLocalFeedback}>Save Feedback</button>
+                  <button type="button" disabled={!feedbackItems.length} onClick={() => downloadJson("cloakpay-feedback.json", feedbackItems)}>Export Feedback</button>
+                </div>
+                <div className="button-row">
+                  <a href={feedbackIssueUrl} target="_blank" rel="noreferrer">Open GitHub Issue</a>
+                  <a href={supportEmail}>Email Support</a>
+                </div>
+                <div className="feedback-count"><strong>{feedbackItems.length}</strong><span>Saved Local Feedback Item{feedbackItems.length === 1 ? "" : "s"}</span></div>
+              </section>
+            </div>
+          )}
         </section>
       </section>
     </main>

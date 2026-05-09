@@ -78,11 +78,11 @@ export const WordsPullUpMultiStyle = ({ segments, className = "", style }: Words
 };
 
 const navItems = [
-  { label: "Desk", href: "#desk" },
-  { label: "Legal", href: "#firewall" },
-  { label: "Merchant", href: "#readiness" },
-  { label: "Lens", href: "#history" },
-  { label: "Payroll", href: "#feedback" }
+  { label: "Desk", href: "#overview" },
+  { label: "Legal", href: "#legal" },
+  { label: "Merchant", href: "#merchant" },
+  { label: "Lens", href: "#lens" },
+  { label: "Payroll", href: "#payroll" }
 ];
 
 const heroVideo =
@@ -119,7 +119,7 @@ const PrismaHero = () => {
               payment proof locally with QVAC before anything reaches the chain.
             </p>
 
-            <a href="#firewall" className="prisma-hero-cta">
+            <a href="#legal" className="prisma-hero-cta">
               Open desk
               <span>
                 <ArrowRight aria-hidden="true" />
