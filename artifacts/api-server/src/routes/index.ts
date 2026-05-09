@@ -1,8 +1,8 @@
 import { Router, type IRouter } from "express";
-import healthRouter from "./health";
-import qvacRouter from "./qvac";
-import solanaRouter from "./solana";
-import privacyRouter from "./privacy";
+import healthRouter from "./health.js";
+import qvacRouter from "./qvac.js";
+import solanaRouter from "./solana.js";
+import privacyRouter from "./privacy.js";
 
 const router: IRouter = Router();
 
