@@ -55,6 +55,7 @@ const networkLabels: Record<NetworkCluster, string> = {
 };
 
 type DeskView = "overview" | "legal" | "merchant" | "lens" | "payroll" | "records" | "support";
+type AppView = "home" | DeskView;
 
 const deskNavigation: Array<{ id: DeskView; label: string; kicker: string }> = [
   { id: "overview", label: "Command", kicker: "Start" },
@@ -66,9 +67,9 @@ const deskNavigation: Array<{ id: DeskView; label: string; kicker: string }> = [
   { id: "support", label: "Support", kicker: "Loop" }
 ];
 
-function viewFromHash(hash: string): DeskView {
+function viewFromHash(hash: string): AppView {
   const value = hash.replace("#", "") as DeskView;
-  return deskNavigation.some((item) => item.id === value) ? value : "overview";
+  return deskNavigation.some((item) => item.id === value) ? value : "home";
 }
 
 const productDescription = "your private business operating system on Solana.";
@@ -217,8 +218,8 @@ export default function App() {
   const [feedbackEmail, setFeedbackEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Ready for private business analysis.");
-  const [activeView, setActiveView] = useState<DeskView>(() =>
-    typeof window === "undefined" ? "overview" : viewFromHash(window.location.hash)
+  const [activeView, setActiveView] = useState<AppView>(() =>
+    typeof window === "undefined" ? "home" : viewFromHash(window.location.hash)
   );
 
   useEffect(() => {
@@ -245,9 +246,6 @@ export default function App() {
     const syncHash = () => {
       const nextView = viewFromHash(window.location.hash);
       setActiveView(nextView);
-      if (window.location.hash) {
-        window.setTimeout(() => document.getElementById("desk")?.scrollIntoView({ behavior: "auto", block: "start" }), 0);
-      }
     };
 
     syncHash();
@@ -315,12 +313,16 @@ export default function App() {
   function openDesk(view: DeskView) {
     setActiveView(view);
     window.history.replaceState(null, "", `#${view}`);
-    document.getElementById("desk")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function loadWorkflow(view: DeskView, nextText: string) {
     loadSample(nextText);
     openDesk(view);
+  }
+
+  function openHome() {
+    setActiveView("home");
+    window.history.replaceState(null, "", window.location.pathname);
   }
 
   async function onFileSelected(nextFile: File | null) {
@@ -626,49 +628,21 @@ export default function App() {
     }
   }
 
+  if (activeView === "home") {
+    return (
+      <main className="site-shell">
+        <PrismaHero />
+      </main>
+    );
+  }
+
   return (
     <main className="site-shell">
-      <PrismaHero />
-
-      <div className="console-anchor-stack" aria-hidden="true">
-        {deskNavigation.map((item) => (
-          <span key={item.id} id={item.id} />
-        ))}
-      </div>
-
       <section id="desk" className="app-shell product-console" aria-label="CloakPay AI product workspace">
-        <aside className="desk-sidebar" aria-label="CloakPay navigation">
-          <div className="desk-brand">
-            <small>CloakPay AI</small>
-            <strong>Private business OS</strong>
-            <p>Deals, receipts, wallet checks, and payroll in one local-first Solana desk.</p>
-          </div>
-
-          <nav className="desk-nav">
-            {deskNavigation.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                className={activeView === item.id ? "active" : ""}
-                onClick={() => openDesk(item.id)}
-              >
-                <span>{item.kicker}</span>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-
-          <div className="desk-sidebar-card">
-            <small>Current rail</small>
-            <strong>{networkLabels[network]}</strong>
-            <p>{walletAddress ? formatAddress(walletAddress) : "Wallet not connected"}</p>
-          </div>
-        </aside>
-
         <section className="desk-stage">
           <header className="desk-topbar">
             <div>
-              <small>Live workspace</small>
+              <small>CloakPay AI workspace</small>
               <h1>
                 {activeView === "overview" && "Command center"}
                 {activeView === "legal" && "Legal Desk"}
@@ -680,6 +654,9 @@ export default function App() {
               </h1>
               <p>{message}</p>
             </div>
+            <button type="button" className="back-home-button" onClick={openHome}>
+              Back To Hero
+            </button>
             <div className="desk-status">
               <small>QVAC</small>
               <strong>{qvacStatus?.mode === "live-qvac" ? "Live Local" : "Browser Fallback"}</strong>

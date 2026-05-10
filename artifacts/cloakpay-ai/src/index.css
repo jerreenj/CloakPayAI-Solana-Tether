@@ -11,6 +11,12 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  height: 100%;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 16px;
@@ -76,8 +82,9 @@ a:hover {
 
 .site-shell {
   background: #090d0b;
+  height: 100vh;
   min-height: 100vh;
-  overflow: visible;
+  overflow: hidden;
   position: relative;
 }
 
@@ -1441,8 +1448,10 @@ code {
     linear-gradient(180deg, #080c0a 0%, #0f1512 46%, #080c0a 100%);
   display: grid;
   gap: 0;
-  grid-template-columns: 280px minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr);
+  height: 100vh;
   min-height: 100vh;
+  overflow: hidden;
   padding: 0;
 }
 
@@ -1551,7 +1560,9 @@ code {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: auto;
   padding: clamp(22px, 3vw, 42px);
 }
 
@@ -1559,7 +1570,7 @@ code {
   align-items: start;
   display: grid;
   gap: 18px;
-  grid-template-columns: minmax(0, 1fr) minmax(210px, 280px);
+  grid-template-columns: minmax(0, 1fr) auto minmax(210px, 280px);
 }
 
 .desk-topbar h1 {
@@ -1578,6 +1589,20 @@ code {
   display: grid;
   gap: 4px;
   padding: 15px;
+}
+
+.back-home-button {
+  align-self: start;
+  background: rgba(239, 233, 210, 0.08);
+  border: 1px solid rgba(239, 233, 210, 0.16);
+  color: #fffdf2;
+  min-height: 42px;
+  white-space: nowrap;
+}
+
+.back-home-button:hover {
+  background: #e1e0cc;
+  color: #050706;
 }
 
 .desk-status span {
