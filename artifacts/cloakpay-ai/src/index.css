@@ -1813,3 +1813,425 @@ code {
     min-height: auto;
   }
 }
+
+/* Agent console refinement */
+:root {
+  --console-bg: #040404;
+  --console-surface: rgba(12, 12, 11, 0.92);
+  --console-surface-strong: rgba(18, 17, 15, 0.98);
+  --console-line: rgba(255, 255, 255, 0.075);
+  --console-line-strong: rgba(255, 150, 64, 0.24);
+  --console-text: #f6f1e8;
+  --console-muted: rgba(246, 241, 232, 0.58);
+  --console-faint: rgba(246, 241, 232, 0.36);
+  --console-accent: #ff9438;
+  --console-accent-soft: rgba(255, 148, 56, 0.14);
+  --console-danger: #ff5f57;
+  --console-blue: #4aa3ff;
+}
+
+.product-console {
+  background:
+    radial-gradient(circle at 12% 14%, rgba(255, 148, 56, 0.11), transparent 24%),
+    radial-gradient(circle at 78% 8%, rgba(255, 255, 255, 0.055), transparent 22%),
+    linear-gradient(180deg, #030303 0%, #070707 48%, #030303 100%);
+  color: var(--console-text);
+}
+
+.product-console::before {
+  background-image:
+    radial-gradient(circle, rgba(255, 255, 255, 0.28) 0 1px, transparent 1.2px),
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-position: 0 0, 0 0, 0 0;
+  background-size: 92px 92px, 56px 56px, 56px 56px;
+  content: "";
+  inset: 0;
+  opacity: 0.38;
+  pointer-events: none;
+  position: absolute;
+}
+
+.desk-stage {
+  gap: 14px;
+  padding: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.desk-topbar {
+  align-items: center;
+  background: rgba(6, 6, 6, 0.96);
+  border-bottom: 1px solid var(--console-line);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.025);
+  gap: 18px;
+  grid-template-columns: minmax(220px, 1fr) auto minmax(190px, 260px);
+  min-height: 70px;
+  padding: 13px clamp(16px, 2vw, 28px);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.desk-topbar small {
+  color: var(--console-accent);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+}
+
+.desk-topbar h1 {
+  color: var(--console-text);
+  font-size: clamp(1.05rem, 1.4vw, 1.32rem);
+  font-weight: 850;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+  margin-bottom: 3px;
+}
+
+.desk-topbar p {
+  color: var(--console-muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  max-width: 760px;
+}
+
+.desk-status {
+  align-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--console-text);
+  gap: 1px;
+  justify-items: end;
+  padding: 0;
+  text-align: right;
+}
+
+.desk-status strong {
+  font-size: 0.92rem;
+}
+
+.desk-status span {
+  color: var(--console-muted);
+  font-size: 0.72rem;
+}
+
+.back-home-button,
+button,
+a {
+  border-radius: 12px;
+}
+
+.back-home-button,
+.button-row button:first-child,
+.workflow-grid button:hover,
+.prisma-hero-cta {
+  border-color: rgba(255, 148, 56, 0.32);
+}
+
+.back-home-button {
+  background: var(--console-accent);
+  border: 1px solid rgba(255, 148, 56, 0.52);
+  color: #120904;
+  font-size: 0.82rem;
+  font-weight: 900;
+  min-height: 40px;
+  padding: 0.68rem 0.95rem;
+}
+
+.back-home-button:hover {
+  background: #ffad63;
+  color: #120904;
+}
+
+.console-metrics {
+  gap: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 clamp(16px, 2vw, 28px);
+}
+
+.stack-strip div {
+  background: rgba(7, 7, 7, 0.72);
+  border: 0;
+  border-right: 1px solid var(--console-line);
+  border-radius: 0;
+  padding: 9px 15px;
+}
+
+.stack-strip div:first-child {
+  border-left: 1px solid var(--console-line);
+}
+
+.stack-strip small,
+.panel small,
+.overview-hero-panel small,
+.workflow-grid small,
+.section-heading small {
+  color: var(--console-faint);
+  font-size: 0.64rem;
+  letter-spacing: 0.075em;
+}
+
+.stack-strip strong {
+  color: var(--console-text);
+  font-size: 0.84rem;
+  line-height: 1.25;
+}
+
+.desk-page {
+  margin: 0 clamp(16px, 2vw, 28px) clamp(16px, 2vw, 28px);
+}
+
+.overview-page {
+  grid-template-columns: minmax(420px, 1fr) minmax(360px, 0.62fr);
+}
+
+.overview-hero-panel,
+.workflow-grid button,
+.panel,
+.readiness-board,
+.operator-strip div,
+.receipt-block,
+.risk-score,
+.history-item,
+.qvac-engine-bar,
+.dropzone,
+input,
+select,
+textarea,
+code {
+  background: var(--console-surface);
+  border: 1px solid var(--console-line);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+.overview-hero-panel,
+.panel,
+.readiness-board,
+.operator-strip div {
+  border-radius: 18px;
+}
+
+.overview-hero-panel {
+  background:
+    linear-gradient(135deg, rgba(255, 148, 56, 0.09), transparent 34%),
+    var(--console-surface);
+  min-height: 330px;
+}
+
+.overview-hero-panel h2 {
+  color: var(--console-text);
+  font-size: clamp(2rem, 3vw, 3.25rem);
+  font-weight: 820;
+  line-height: 0.98;
+}
+
+.overview-hero-panel p,
+.workflow-grid span,
+.readiness-grid p,
+.history-item p,
+.operator-strip p,
+.muted {
+  color: var(--console-muted);
+}
+
+.workflow-grid {
+  gap: 12px;
+}
+
+.workflow-grid button {
+  min-height: 158px;
+}
+
+.workflow-grid button:hover {
+  background:
+    linear-gradient(135deg, rgba(255, 148, 56, 0.12), transparent 44%),
+    var(--console-surface-strong);
+  transform: translateY(-1px);
+}
+
+.workflow-grid strong,
+.panel-header h2 {
+  color: var(--console-text);
+}
+
+.operator-strip.console-operator {
+  display: none;
+}
+
+.product-grid {
+  align-items: start;
+  gap: 14px;
+  grid-template-columns: minmax(300px, 0.78fr) minmax(380px, 1.12fr) minmax(280px, 0.78fr);
+}
+
+.panel {
+  gap: 12px;
+  padding: 16px;
+}
+
+.panel-header span,
+.flow-rail span,
+.feedback-count strong {
+  background: var(--console-accent);
+  color: #130905;
+}
+
+.flow-rail {
+  background: rgba(6, 6, 6, 0.7);
+  border-color: var(--console-line);
+  border-radius: 16px;
+  margin-bottom: 0;
+}
+
+.flow-rail div {
+  color: var(--console-muted);
+  padding: 9px;
+}
+
+.flow-rail .active {
+  background: var(--console-accent-soft);
+  color: var(--console-text);
+}
+
+.dropzone {
+  background:
+    linear-gradient(135deg, rgba(255, 148, 56, 0.09), transparent 42%),
+    #090909;
+  border-style: dashed;
+}
+
+.dropzone strong,
+a,
+button {
+  background: #141312;
+  border: 1px solid var(--console-line);
+  color: var(--console-text);
+}
+
+button:hover:not(:disabled),
+a:hover {
+  background: #1d1b18;
+  border-color: var(--console-line-strong);
+  color: #fff7ef;
+}
+
+.button-row button:first-child,
+.sample-row button,
+.wallet-panel button:last-of-type {
+  background: var(--console-accent);
+  border-color: rgba(255, 148, 56, 0.5);
+  color: #130905;
+}
+
+.button-row button:first-child:hover:not(:disabled),
+.sample-row button:hover:not(:disabled),
+.wallet-panel button:last-of-type:hover:not(:disabled) {
+  background: #ffad63;
+  color: #130905;
+}
+
+.sample-row button:last-child,
+.usdt-sample-btn {
+  background: #181614 !important;
+  border-color: var(--console-line) !important;
+  color: var(--console-text) !important;
+}
+
+input,
+select,
+textarea {
+  color: var(--console-text);
+}
+
+textarea {
+  min-height: 170px;
+}
+
+.qvac-engine-bar {
+  border-radius: 14px;
+}
+
+.qvac-mode-badge.qvac,
+.qvac-mode-badge.fallback,
+.qvac-mode-badge.sample,
+.qvac-local-badge {
+  background: var(--console-accent-soft);
+  border-color: var(--console-line-strong);
+  color: #ffb873;
+}
+
+.qvac-block-item,
+.ocr-list p,
+.explanation {
+  background: rgba(255, 148, 56, 0.06);
+  border-color: rgba(255, 148, 56, 0.14);
+}
+
+.qvac-bar-fill {
+  background: var(--console-accent) !important;
+}
+
+.risk-panel.safe .risk-score,
+.risk-panel.review .risk-score,
+.risk-panel.pending .risk-score {
+  background: rgba(255, 148, 56, 0.12);
+  border-color: rgba(255, 148, 56, 0.24);
+}
+
+.risk-panel.block .risk-score {
+  background: rgba(255, 95, 87, 0.13);
+  border-color: rgba(255, 95, 87, 0.28);
+}
+
+.warnings p,
+.safety-banner {
+  background: rgba(255, 148, 56, 0.11);
+  border-color: rgba(255, 148, 56, 0.24);
+  color: #ffd2aa;
+}
+
+.readiness-grid div {
+  background: rgba(8, 8, 8, 0.72);
+  border-color: var(--console-line);
+}
+
+.split-page {
+  grid-template-columns: minmax(360px, 0.78fr) minmax(0, 1.22fr);
+}
+
+.records-page,
+.support-page {
+  max-width: 1040px;
+}
+
+@media (max-width: 1180px) {
+  .overview-page,
+  .product-grid,
+  .split-page {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .desk-stage {
+    padding: 0;
+  }
+
+  .desk-topbar {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+
+  .desk-status {
+    justify-items: start;
+    text-align: left;
+  }
+
+  .console-metrics {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .desk-page {
+    margin: 0 14px 14px;
+  }
+}
