@@ -35,9 +35,9 @@ The app keeps the name CloakPay AI, but the product story is now broader than a 
 | Pillar | What It Does |
 | --- | --- |
 | Legal Desk | Describe a deal in plain English. CloakPay AI creates a local contract-style payment intent, checks risk, prepares wallet proof, and creates a private receipt. |
-| Offline Merchant | Create product lookup, pricing, and receipt context on-device. Export the receipt now and sync settlement when internet and wallet access are available. |
+| Offline Merchant | Create product lookup, pricing, and receipt context on-device. Queue the settlement locally, then sync it into wallet signing when internet and wallet access are available. |
 | Wallet Lens | Paste or load wallet context before dealing with someone. CloakPay AI creates a private trust report from the business prompt and public-chain direction. |
-| Payroll | Validate team CSV-style payout rows locally, flag issues, build the payment intent, and export payroll proof without sending payroll data to a cloud database. |
+| Payroll | Validate team CSV-style payout rows locally, flag issues, build a real multi-recipient Solana transaction, and export payroll proof without sending payroll data to a cloud database. |
 
 ## SOL and USDT
 
@@ -53,16 +53,17 @@ When a workflow is denominated in USDT, CloakPay prepares the Solana SPL token t
 
 - Live app: https://cloakpay-ai.vercel.app.
 - Connected API paths: `/api/healthz`, `/api/qvac/status`, `/api/qvac/analyze-payment`, `/api/solana/prepare`, `/api/privacy/receipt`.
-- Real Solana transaction preparation for SOL and USDT SPL transfers.
+- Real Solana transaction preparation for SOL, USDT SPL transfers, and same-token payroll batches.
 - Mainnet-beta path is available only after explicit real-funds confirmation.
 - Wallet signing stays wallet-side.
+- Offline Merchant stores queued payment intents locally and syncs them into the wallet signing flow when online.
 - Local account, history, feedback, monitor events, and privacy receipts live in browser storage and can be exported as JSON.
 
 ## Product Truth
 
 - Legal Desk currently prepares agreement context, wallet proof, payment intent, and receipt. Full automated escrow release logic still needs a dedicated smart contract and audit before broad real-money use.
-- Offline Merchant currently creates local receipt/payment context and exportable records. Offline payment sync must be validated under real merchant conditions before production rollout.
-- Payroll currently validates and prepares payout intent from local CSV-style input. Large batch settlement needs additional operational safeguards before live payroll use.
+- Offline Merchant currently creates local receipt/payment context, queues it in browser storage, and syncs it into wallet signing when online. It does not custody funds.
+- Payroll currently validates CSV-style input and prepares a real same-token multi-recipient Solana transaction. Very large payroll runs still need additional operational safeguards before live payroll use.
 - Wallet Lens currently generates private trust/risk context from supplied wallet/business input. Rich chain-history indexing would require an additional data source or local indexer.
 
 ## Why This Fits QVAC

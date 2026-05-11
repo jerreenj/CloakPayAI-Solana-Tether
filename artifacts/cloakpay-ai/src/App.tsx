@@ -4,14 +4,18 @@ import { PrismaHero } from "./components/ui/prisma-hero";
 import {
   clearFeedback,
   clearMonitorEvents,
+  clearOfflineQueue,
   clearProfile,
   loadFeedback,
   loadHistory,
   loadMonitorEvents,
+  loadOfflineQueue,
   loadProfile,
+  removeOfflineQueueItem,
   saveFeedbackItem,
   saveHistoryItem,
   saveMonitorEvent,
+  saveOfflineQueueItem,
   saveProfile,
   updateHistoryItem
 } from "./localStore";
@@ -23,6 +27,8 @@ import type {
   LocalHistoryItem,
   MonitorEvent,
   NetworkCluster,
+  OfflineQueueItem,
+  PayrollRecipient,
   PaymentIntent,
   PreparedTransaction,
   PrivacyReceipt,
@@ -75,7 +81,7 @@ function viewFromHash(hash: string): AppView {
 const productDescription = "your private business operating system on Solana.";
 
 const legalBrief = `Tool: Legal Desk
-Deal: Supplier escrow agreement
+Deal: Supplier agreement
 Client: Your company
 Counterparty: Supplier wallet owner
 Amount: 10.00 USDT
@@ -114,7 +120,7 @@ Memo: pay immediately to avoid penalty
 Note: Counterparty asks for private wallet access and instant approval.`;
 
 const toolWorkflows = [
-  ["Legal Desk", "Draft a deal locally, review the counterparty, then prepare wallet-signed escrow proof.", legalBrief],
+  ["Legal Desk", "Draft a deal locally, review the counterparty, then prepare wallet-signed payment proof.", legalBrief],
   ["Offline Merchant", "Create product receipts and payment intents on-device, then sync settlement when online.", merchantBrief],
   ["Wallet Lens", "Paste a wallet before you deal and generate a private trust report from public chain context.", walletLensBrief],
   ["Payroll", "Validate team CSV rows locally, flag bad entries, and prepare clean payout batches.", payrollBrief]
@@ -173,6 +179,30 @@ function toPublicKey(value: string, label: string) {
   }
 }
 
+function parsePayrollRecipients(text: string): PayrollRecipient[] {
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const start = lines.findIndex((line) => /^name\s*,\s*wallet\s*,\s*amount\s*,\s*token/i.test(line));
+  if (start === -1) return [];
+
+  return lines
+    .slice(start + 1)
+    .map((line) => line.split(",").map((part) => part.trim()))
+    .filter((parts) => parts.length >= 4)
+    .map(([name, wallet, amount, token]) => {
+      const parsedToken: PayrollRecipient["token"] = token?.toUpperCase() === "SOL" ? "SOL" : "USDT";
+      return {
+        name,
+        wallet,
+        amount: Number(amount),
+        token: parsedToken
+      };
+    })
+    .filter((recipient) => recipient.name && recipient.wallet && Number.isFinite(recipient.amount) && recipient.amount > 0);
+}
+
 function createId() {
   return typeof crypto.randomUUID === "function" ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -209,6 +239,7 @@ export default function App() {
   const [feedbackItems, setFeedbackItems] = useState<FeedbackItem[]>(() => loadFeedback());
   const [profile, setProfile] = useState<UserProfile | null>(() => loadProfile());
   const [monitorEvents, setMonitorEvents] = useState<MonitorEvent[]>(() => loadMonitorEvents());
+  const [offlineQueue, setOfflineQueue] = useState<OfflineQueueItem[]>(() => loadOfflineQueue());
   const [accountName, setAccountName] = useState(() => loadProfile()?.name ?? "Preview Operator");
   const [accountEmail, setAccountEmail] = useState(() => loadProfile()?.email ?? "");
   const [network, setNetwork] = useState<NetworkCluster>("mainnet-beta");
@@ -431,7 +462,7 @@ export default function App() {
     setIntent(data.intent);
     setReceipt(nextReceipt);
     rememberAnalysis(data, nextReceipt);
-    setMessage("Legal Desk preview complete: local analysis and receipt were created on-device.");
+    setMessage("No-wallet analysis complete. No transaction was prepared or signed.");
     setBusy(false);
   }
 
@@ -595,6 +626,67 @@ export default function App() {
     }
   }
 
+  async function preparePayrollBatch() {
+    const recipients = parsePayrollRecipients(invoiceText);
+    if (!walletAddress) {
+      setMessage("Connect a wallet before preparing payroll.");
+      return;
+    }
+    if (recipients.length === 0) {
+      setMessage("Payroll CSV needs name,wallet,amount,token rows before a batch can be prepared.");
+      return;
+    }
+    if (network === "mainnet-beta" && !mainnetAcknowledged) {
+      setMessage("Confirm the mainnet real-funds warning before preparing a payroll batch.");
+      return;
+    }
+
+    setBusy(true);
+    setMessage(`Preparing ${recipients.length}-recipient payroll batch...`);
+    try {
+      const response = await fetch(apiUrl("/solana/prepare-batch"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ recipients, payer: walletAddress, network })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      setPrepared((await response.json()) as PreparedTransaction);
+      logEvent("info", "wallet", `${networkLabels[network]} payroll batch prepared.`);
+      setMessage("Payroll batch prepared. Nothing has been signed yet.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Could not prepare payroll batch.");
+      logEvent("error", "wallet", error instanceof Error ? error.message : "Could not prepare payroll batch.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function queueOfflineIntent() {
+    if (!intent) {
+      setMessage("Run Merchant Analysis before queueing an offline settlement.");
+      return;
+    }
+    const item = saveOfflineQueueItem({
+      id: createId(),
+      createdAt: new Date().toISOString(),
+      intent,
+      riskVerdict: analysis?.riskReport.verdict,
+      receiptCommitment: receipt?.commitment,
+      network
+    });
+    setOfflineQueue(item);
+    logEvent("info", "system", "Offline merchant intent queued locally.");
+    setMessage("Merchant intent queued locally. Sync it when the wallet is online.");
+  }
+
+  function syncOfflineIntent(item: OfflineQueueItem) {
+    setIntent(item.intent);
+    setPrepared(null);
+    setTxSignature("");
+    setMessage("Queued merchant intent loaded. Connect wallet, prepare, then sign.");
+    setOfflineQueue(removeOfflineQueueItem(item.id));
+  }
+
   async function signAndSend() {
     const provider = window.solana;
     if (!provider || !prepared) return;
@@ -704,10 +796,61 @@ export default function App() {
             <div className="warnings">
               {analysis.riskReport.warnings.slice(0, 3).map((warning) => <p key={warning}>{warning}</p>)}
             </div>
+            <label className="network-control">
+              Network
+              <select
+                value={network}
+                onChange={(event) => {
+                  const nextNetwork = event.target.value as NetworkCluster;
+                  setNetwork(nextNetwork);
+                  setPrepared(null);
+                  setTxSignature("");
+                  setMainnetAcknowledged(false);
+                  logEvent("info", "wallet", `Network switched to ${networkLabels[nextNetwork]}.`);
+                }}
+              >
+                <option value="devnet">Testnet</option>
+                <option value="mainnet-beta">Mainnet-Beta</option>
+              </select>
+            </label>
+            {network === "mainnet-beta" && (
+              <label className="mainnet-check">
+                <input type="checkbox" checked={mainnetAcknowledged} onChange={(event) => setMainnetAcknowledged(event.target.checked)} />
+                I understand this prepares a real mainnet {activeView === "payroll" ? "payroll batch" : intent.token === "USDT" ? "USDT" : "SOL"} transaction with real funds.
+              </label>
+            )}
             <div className="button-row">
-              <button type="button" disabled={busy || !intent} onClick={createReceipt}>Create Receipt</button>
-              <button type="button" onClick={() => openDesk("legal")}>Open Signing View</button>
+              <button type="button" disabled={busy || Boolean(walletAddress)} onClick={connectWallet}>Connect Wallet</button>
+              <button
+                type="button"
+                disabled={busy || !walletAddress || analysis.riskReport.verdict === "block" || (network === "mainnet-beta" && !mainnetAcknowledged)}
+                onClick={activeView === "payroll" ? preparePayrollBatch : prepareTransaction}
+              >
+                {activeView === "payroll" ? `Prepare ${networkLabels[network]} Batch` : `Prepare ${networkLabels[network]} Payment`}
+              </button>
             </div>
+            <div className="button-row">
+              <button type="button" disabled={busy || !canSend} onClick={signAndSend}>Sign And Send</button>
+              <button type="button" disabled={busy || !intent} onClick={createReceipt}>Create Receipt</button>
+            </div>
+            {prepared && (
+              <div className="receipt-block">
+                <small>Prepared {prepared.kind === "batch" ? `${prepared.transferCount} recipient batch` : `${prepared.token ?? "SOL"} transfer`}</small>
+                <p>{prepared.kind === "batch" ? `${prepared.totalAmount} ${prepared.token} total` : `${prepared.token === "USDT" ? prepared.usdtAmount : prepared.lamports} ${prepared.token === "USDT" ? "USDT" : "lamports"}`}</p>
+              </div>
+            )}
+            {activeView === "merchant" && (
+              <div className="receipt-stack">
+                <button type="button" disabled={busy || !intent} onClick={queueOfflineIntent}>Queue Offline Settlement</button>
+                {offlineQueue.slice(0, 3).map((item) => (
+                  <div key={item.id} className="history-item">
+                    <strong>{item.intent.merchant}</strong>
+                    <p>{item.intent.amount} {item.intent.token} queued {new Date(item.createdAt).toLocaleString()}</p>
+                    <button type="button" onClick={() => syncOfflineIntent(item)}>Sync To Wallet</button>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         ) : (
           <p className="muted">{emptyText}</p>
@@ -767,7 +910,7 @@ export default function App() {
                     Open Legal Desk
                   </button>
                   <button type="button" disabled={busy} onClick={tryWithoutWallet}>
-                    Run Without Wallet
+                    Analyze Without Wallet
                   </button>
                 </div>
               </section>
@@ -985,8 +1128,10 @@ export default function App() {
                   <button disabled={busy || !canSend} onClick={signAndSend}>Sign And Send</button>
                   {prepared && (
                     <div className="receipt-block">
-                      <small>Prepared {prepared.token ?? "SOL"} transfer</small>
-                      {prepared.token === "USDT" ? (
+                      <small>Prepared {prepared.kind === "batch" ? `${prepared.transferCount} recipient batch` : `${prepared.token ?? "SOL"} transfer`}</small>
+                      {prepared.kind === "batch" ? (
+                        <p>{prepared.totalAmount} {prepared.token} total</p>
+                      ) : prepared.token === "USDT" ? (
                         <>
                           <p>{prepared.usdtAmount} USDT to {formatAddress(prepared.to)}</p>
                           {prepared.toATA && <p className="muted">Token account: {formatAddress(prepared.toATA)}</p>}

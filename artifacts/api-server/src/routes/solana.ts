@@ -11,6 +11,7 @@ import { Router, type IRouter } from "express";
 const router: IRouter = Router();
 
 type NetworkCluster = "devnet" | "mainnet-beta";
+type BatchRecipient = { wallet: string; amount: number; token: "SOL" | "USDT"; name?: string };
 
 const endpoints: Record<NetworkCluster, string> = {
   devnet: process.env["SOLANA_DEVNET_RPC"] ?? "https://api.devnet.solana.com",
@@ -148,6 +149,110 @@ router.post("/solana/prepare", async (req, res) => {
     recentBlockhash: transaction.recentBlockhash ?? blockhash,
     serializedTransaction: transaction.serialize({ requireAllSignatures: false }).toString("base64"),
     explorerUrl: `https://explorer.solana.com/address/${toPubkey.toBase58()}${cluster}`
+  });
+});
+
+router.post("/solana/prepare-batch", async (req, res) => {
+  const { recipients, payer, network = "devnet" } = req.body as {
+    recipients: BatchRecipient[];
+    payer: string;
+    network?: NetworkCluster;
+  };
+
+  if (!Array.isArray(recipients) || recipients.length === 0) {
+    return res.status(400).json({ error: "At least one payroll recipient is required." });
+  }
+
+  const token = recipients[0]?.token;
+  if (token !== "SOL" && token !== "USDT") {
+    return res.status(400).json({ error: "Payroll batch token must be SOL or USDT." });
+  }
+  if (recipients.some((recipient) => recipient.token !== token)) {
+    return res.status(400).json({ error: "Payroll batch must use one token per transaction." });
+  }
+
+  const cluster = network === "devnet" ? "?cluster=devnet" : "";
+  const endpoint = endpoints[network] ?? endpoints["devnet"];
+  const connection = new Connection(endpoint, "confirmed");
+  let fromPubkey: PublicKey;
+
+  try {
+    fromPubkey = toPublicKey(payer, "payer");
+  } catch (error) {
+    return res.status(400).json({
+      error: error instanceof Error ? error.message : "Invalid payer address."
+    });
+  }
+
+  const { blockhash } = await connection.getLatestBlockhash("confirmed");
+  const transaction = new Transaction({ feePayer: fromPubkey, recentBlockhash: blockhash });
+  let totalAmount = 0;
+
+  try {
+    if (token === "USDT") {
+      const mint = USDT_MINT[network];
+      const fromATA = getAssociatedTokenAddressSync(mint, fromPubkey, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+
+      for (const recipient of recipients) {
+        const toPubkey = toPublicKey(recipient.wallet, recipient.name ?? "recipient");
+        const toATA = getAssociatedTokenAddressSync(mint, toPubkey, false, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
+        const info = await connection.getAccountInfo(toATA);
+        if (!info) {
+          transaction.add(
+            createAssociatedTokenAccountInstruction(
+              fromPubkey,
+              toATA,
+              toPubkey,
+              mint,
+              TOKEN_PROGRAM_ID,
+              ASSOCIATED_TOKEN_PROGRAM_ID
+            )
+          );
+        }
+        transaction.add(
+          createTransferCheckedInstruction(
+            fromATA,
+            mint,
+            toATA,
+            fromPubkey,
+            BigInt(Math.round(recipient.amount * 10 ** USDT_DECIMALS)),
+            USDT_DECIMALS,
+            [],
+            TOKEN_PROGRAM_ID
+          )
+        );
+        totalAmount += recipient.amount;
+      }
+    } else {
+      for (const recipient of recipients) {
+        const toPubkey = toPublicKey(recipient.wallet, recipient.name ?? "recipient");
+        const lamports = Math.max(1, Math.round(recipient.amount * LAMPORTS_PER_SOL));
+        transaction.add(SystemProgram.transfer({ fromPubkey, toPubkey, lamports }));
+        totalAmount += recipient.amount;
+      }
+    }
+  } catch (error) {
+    return res.status(400).json({
+      error: error instanceof Error ? error.message : "Could not build payroll batch transaction."
+    });
+  }
+
+  req.log.info({ network, token, transferCount: recipients.length, totalAmount }, "Payroll batch transfer prepared");
+
+  return res.json({
+    network,
+    kind: "batch",
+    token,
+    from: fromPubkey.toBase58(),
+    to: `${recipients.length} recipients`,
+    lamports: token === "SOL" ? Math.round(totalAmount * LAMPORTS_PER_SOL) : 0,
+    usdtAmount: token === "USDT" ? totalAmount : undefined,
+    transferCount: recipients.length,
+    totalAmount,
+    mintAddress: token === "USDT" ? USDT_MINT[network].toBase58() : undefined,
+    recentBlockhash: blockhash,
+    serializedTransaction: transaction.serialize({ requireAllSignatures: false }).toString("base64"),
+    explorerUrl: `https://explorer.solana.com/address/${fromPubkey.toBase58()}${cluster}`
   });
 });
 

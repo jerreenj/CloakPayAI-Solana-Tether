@@ -14,7 +14,7 @@
 4. Show the local analysis, trust decision, deal/payment intent, and private receipt.
 5. Load **Offline Merchant**, **Wallet Lens**, and **Payroll** to show the full business loop.
 6. Connect a Solana wallet only after the intent is clear.
-7. Prepare a real SOL transaction on devnet or mainnet-beta.
+7. Prepare a real SOL, USDT SPL, or payroll batch transaction on devnet or mainnet-beta.
 8. Export local history, account, monitor, receipt, and feedback records.
 
 ## What To Say
@@ -27,9 +27,9 @@ CloakPay AI is a QVAC-powered private business operating system for Solana teams
 - The hero/background video remains unchanged.
 - Four workflows are in the app: Legal Desk, Offline Merchant, Wallet Lens, Payroll.
 - QVAC/local analysis is central to the product.
-- SOL transaction preparation is connected on devnet and mainnet-beta.
+- SOL, USDT SPL, and same-token payroll batch preparation are connected on devnet and mainnet-beta.
 - Mainnet requires explicit real-funds confirmation.
-- USDT escrow and payroll settlement are not faked; they are the next smart-contract/token-transfer layer.
+- Automated escrow release is not faked; it remains the next smart-contract layer.
 - No paid AI, paid OCR, paid RPC, paid database, or paid assets are required.
 
 ## Final Checks Before Submit

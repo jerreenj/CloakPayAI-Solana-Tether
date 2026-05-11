@@ -11,9 +11,9 @@ CloakPay AI is your private business operating system on Solana. It gives a smal
 3. Click **Run Legal Desk**.
 4. Show how the deal brief becomes a local payment intent with recipient, amount, memo, trust decision, warnings, and evidence.
 5. Create the private receipt and show the business hash, commitment, nullifier preview, and redacted summary.
-6. Open **Offline Merchant** and show the receipt/payment workflow for a field sale.
+6. Open **Offline Merchant** and show the receipt/payment workflow for a field sale. Queue the settlement locally, then sync it into wallet signing.
 7. Open **Wallet Lens** and show the counterparty review workflow before doing business.
-8. Open **Payroll** and show local CSV-style payout validation.
+8. Open **Payroll** and show local CSV-style payout validation plus same-token batch transaction preparation.
 9. Connect a Solana wallet only after the intent is clear.
 10. Prepare a real SOL transaction on devnet or mainnet-beta. Mainnet requires explicit real-funds confirmation.
 11. Show local history, account export, monitor export, and feedback/support export.
@@ -26,7 +26,7 @@ Every private business interaction stays local first: before you deal, when you 
 
 - The public app is live at https://cloakpay-ai.vercel.app.
 - QVAC/local analysis is the core product path.
-- SOL transaction preparation is connected for devnet and mainnet-beta.
-- USDT escrow and batch settlement are product direction, not faked in code.
+- SOL, USDT SPL, and same-token payroll batch transaction preparation are connected for devnet and mainnet-beta.
+- Automated escrow release remains smart-contract product direction, not faked in code.
 - Wallet signing stays in the user's wallet; CloakPay never has custody.
 - Records are local/browser exports, not a paid database.

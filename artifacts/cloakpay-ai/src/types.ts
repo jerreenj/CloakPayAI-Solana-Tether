@@ -70,6 +70,7 @@ export type QvacStatus = {
 export type PreparedTransaction = {
   network: NetworkCluster;
   token?: "SOL" | "USDT";
+  kind?: "single" | "batch";
   from: string;
   to: string;
   fromATA?: string;
@@ -77,6 +78,8 @@ export type PreparedTransaction = {
   mintAddress?: string;
   usdtAmount?: number;
   lamports: number;
+  transferCount?: number;
+  totalAmount?: number;
   recentBlockhash: string;
   serializedTransaction: string;
   explorerUrl: string;
@@ -121,5 +124,21 @@ export type MonitorEvent = {
   level: "info" | "warn" | "error";
   area: "analysis" | "wallet" | "receipt" | "support" | "system";
   message: string;
+  network?: NetworkCluster;
+};
+
+export type PayrollRecipient = {
+  name: string;
+  wallet: string;
+  amount: number;
+  token: "SOL" | "USDT";
+};
+
+export type OfflineQueueItem = {
+  id: string;
+  createdAt: string;
+  intent: PaymentIntent;
+  riskVerdict?: RiskReport["verdict"];
+  receiptCommitment?: string;
   network?: NetworkCluster;
 };

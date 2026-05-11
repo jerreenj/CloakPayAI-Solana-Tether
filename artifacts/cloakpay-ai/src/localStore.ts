@@ -1,9 +1,10 @@
-import type { FeedbackItem, LocalHistoryItem, MonitorEvent, UserProfile } from "./types";
+import type { FeedbackItem, LocalHistoryItem, MonitorEvent, OfflineQueueItem, UserProfile } from "./types";
 
 const historyKey = "cloakpay.localHistory.v1";
 const feedbackKey = "cloakpay.feedback.v1";
 const profileKey = "cloakpay.userProfile.v1";
 const monitorKey = "cloakpay.monitorEvents.v1";
+const offlineQueueKey = "cloakpay.offlineQueue.v1";
 
 function readArray<T>(key: string): T[] {
   try {
@@ -76,4 +77,24 @@ export function saveMonitorEvent(item: MonitorEvent) {
 
 export function clearMonitorEvents() {
   return writeArray<MonitorEvent>(monitorKey, []);
+}
+
+export function loadOfflineQueue() {
+  return readArray<OfflineQueueItem>(offlineQueueKey);
+}
+
+export function saveOfflineQueueItem(item: OfflineQueueItem) {
+  const next = [item, ...loadOfflineQueue().filter((entry) => entry.id !== item.id)].slice(0, 20);
+  return writeArray(offlineQueueKey, next);
+}
+
+export function removeOfflineQueueItem(id: string) {
+  return writeArray(
+    offlineQueueKey,
+    loadOfflineQueue().filter((entry) => entry.id !== id)
+  );
+}
+
+export function clearOfflineQueue() {
+  return writeArray<OfflineQueueItem>(offlineQueueKey, []);
 }
