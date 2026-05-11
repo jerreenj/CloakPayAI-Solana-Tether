@@ -479,6 +479,43 @@ export default function App() {
     }
   }
 
+  async function analyzeWorkflowText(nextText: string, workflowName: string) {
+    setBusy(true);
+    setFile(null);
+    setImagePreview("");
+    setInvoiceText(nextText);
+    setPrepared(null);
+    setReceipt(null);
+    setTxSignature("");
+    setMessage(`Running ${workflowName} locally...`);
+
+    try {
+      const response = await fetch(apiUrl("/qvac/analyze-payment"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: nextText, fileName: `${workflowName.toLowerCase().replace(/\s+/g, "-")}.txt` })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      const data = (await response.json()) as AnalysisResponse;
+      setAnalysis(data);
+      setIntent(data.intent);
+      rememberAnalysis(data);
+      setMessage(`${workflowName} complete: ${verdictLabel(data.riskReport.verdict)}.`);
+    } catch {
+      const data = analyzeLocally({
+        text: nextText,
+        fileName: `${workflowName.toLowerCase().replace(/\s+/g, "-")}.txt`,
+        browserFallback: true
+      });
+      setAnalysis(data);
+      setIntent(data.intent);
+      rememberAnalysis(data);
+      setMessage(`${workflowName} ran in the browser fallback.`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function connectWallet() {
     const provider = window.solana;
     if (!provider) {
@@ -633,6 +670,49 @@ export default function App() {
       <main className="site-shell">
         <PrismaHero />
       </main>
+    );
+  }
+
+  function workflowStatePanel(title: string, emptyText: string) {
+    return (
+      <section className="panel workflow-state-panel">
+        <div className="panel-header">
+          <span>2</span>
+          <h2>{title}</h2>
+        </div>
+        {analysis && intent ? (
+          <>
+            <div className={`risk-score ${analysis.riskReport.verdict}`}>
+              <small>Risk Verdict</small>
+              <strong>{verdictLabel(analysis.riskReport.verdict)}</strong>
+              <b>{analysis.riskReport.score}/100</b>
+            </div>
+            <div className="receipt-stack">
+              <div className="receipt-block">
+                <small>Intent</small>
+                <p>{intent.merchant} · {intent.amount} {intent.token}</p>
+              </div>
+              <div className="receipt-block">
+                <small>Recipient</small>
+                <code>{intent.recipientAddress}</code>
+              </div>
+              <div className="receipt-block">
+                <small>Explanation</small>
+                <p>{analysis.riskReport.explanation}</p>
+              </div>
+            </div>
+            <div className="warnings">
+              {analysis.riskReport.warnings.slice(0, 3).map((warning) => <p key={warning}>{warning}</p>)}
+            </div>
+            <div className="button-row">
+              <button type="button" disabled={busy || !intent} onClick={createReceipt}>Create Receipt</button>
+              <button type="button" onClick={() => openDesk("legal")}>Open Signing View</button>
+            </div>
+          </>
+        ) : (
+          <p className="muted">{emptyText}</p>
+        )}
+      </section>
     );
   }
 
@@ -951,16 +1031,11 @@ export default function App() {
                 <h2>Accept USDT intent anywhere, then settle when online.</h2>
                 <p>Create product lookup, pricing, and receipt context locally. The operator can export the receipt now and prepare settlement when internet and wallet access are available.</p>
                 <div className="button-row">
-                  <button type="button" onClick={() => loadWorkflow("legal", merchantBrief)}>Load Merchant Flow</button>
+                  <button type="button" disabled={busy} onClick={() => analyzeWorkflowText(merchantBrief, "Merchant")}>Run Merchant Analysis</button>
                   <button type="button" onClick={() => openDesk("records")}>View Receipts</button>
                 </div>
               </section>
-              <section className="readiness-board">
-                <div className="section-heading"><small>Readiness</small><h2>Product surfaces that feel real to a merchant.</h2></div>
-                <div className="readiness-grid">
-                  {productionReadiness.map(([label, value]) => <div key={label}><strong>{label}</strong><p>{value}</p></div>)}
-                </div>
-              </section>
+              {workflowStatePanel("Merchant Checkout State", "Run Merchant Analysis to generate the local USDT receipt intent and risk verdict.")}
             </div>
           )}
 
@@ -971,23 +1046,11 @@ export default function App() {
                 <h2>Check the counterparty before the deal moves.</h2>
                 <p>Paste wallet context, review the business purpose, and keep a local trust report before any transaction is prepared.</p>
                 <div className="button-row">
-                  <button type="button" onClick={() => loadWorkflow("legal", walletLensBrief)}>Load Lens Flow</button>
-                  <button type="button" onClick={() => loadWorkflow("legal", riskyBrief)}>Load Risk Check</button>
+                  <button type="button" disabled={busy} onClick={() => analyzeWorkflowText(walletLensBrief, "Wallet Lens")}>Run Wallet Lens</button>
+                  <button type="button" disabled={busy} onClick={() => analyzeWorkflowText(riskyBrief, "Risk Check")}>Run Risk Check</button>
                 </div>
               </section>
-              <section className="panel history-panel">
-                <div className="panel-header"><span>7</span><h2>Recent Local Checks</h2></div>
-                <div className="history-list">
-                  {history.slice(0, 4).map((item) => (
-                    <div key={item.id} className="history-item">
-                      <strong>{item.merchant}</strong>
-                      <p>{item.amount} {item.token} · {verdictLabel(item.verdict)} · {item.score}/100</p>
-                      <small>{new Date(item.createdAt).toLocaleString()}</small>
-                    </div>
-                  ))}
-                  {!history.length && <p className="muted">Run a wallet or legal analysis to create a local record.</p>}
-                </div>
-              </section>
+              {workflowStatePanel("Wallet Lens Report", "Run Wallet Lens to produce a local counterparty risk report.")}
             </div>
           )}
 
@@ -998,23 +1061,11 @@ export default function App() {
                 <h2>Validate payout rows before a batch is signed.</h2>
                 <p>Upload or paste team CSV-style rows, flag missing wallet/amount fields locally, then prepare a payment intent for review.</p>
                 <div className="button-row">
-                  <button type="button" onClick={() => loadWorkflow("legal", payrollBrief)}>Load Payroll Flow</button>
+                  <button type="button" disabled={busy} onClick={() => analyzeWorkflowText(payrollBrief, "Payroll")}>Run Payroll Check</button>
                   <button type="button" onClick={() => openDesk("support")}>Open Support</button>
                 </div>
               </section>
-              <section className="panel monitor-log">
-                <div className="panel-header"><span>8</span><h2>Production Monitor</h2></div>
-                <div className="history-list">
-                  {monitorEvents.map((item) => (
-                    <div key={item.id} className={`history-item monitor-${item.level}`}>
-                      <strong>{item.area.toUpperCase()} · {item.level.toUpperCase()}</strong>
-                      <p>{item.message}</p>
-                      <small>{new Date(item.createdAt).toLocaleString()} · {item.network ? networkLabels[item.network] : "No network"}</small>
-                    </div>
-                  ))}
-                  {!monitorEvents.length && <p className="muted">Run the product flow to generate monitor events.</p>}
-                </div>
-              </section>
+              {workflowStatePanel("Payroll Batch State", "Run Payroll Check to validate the payout rows and create the local batch intent.")}
             </div>
           )}
 
