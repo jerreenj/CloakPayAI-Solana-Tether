@@ -1,6 +1,7 @@
 {
   "name": "@workspace/api-server",
   "version": "0.0.0",
+  "description": "CloakPay AI API for QVAC analysis, privacy receipts, Solana transfers, and payroll batch preparation.",
   "private": true,
   "type": "module",
   "scripts": {

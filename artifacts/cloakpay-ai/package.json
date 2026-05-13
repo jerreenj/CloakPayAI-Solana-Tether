@@ -1,6 +1,7 @@
 {
   "name": "@workspace/cloakpay-ai",
   "version": "0.0.0",
+  "description": "Private QVAC business OS for Solana SOL, USDT, merchant, wallet, and payroll workflows.",
   "private": true,
   "type": "module",
   "scripts": {

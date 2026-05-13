@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "CloakPay AI, a private QVAC business operating system for Solana teams.",
+  "description": "CloakPay AI, a private QVAC business operating system for Solana payments.",
   "homepage": "https://cloakpay-ai.vercel.app",
   "keywords": [
     "qvac",
@@ -12,6 +12,7 @@
     "solana",
     "usdt",
     "mainnet",
+    "batch-transfers",
     "business-os",
     "legal-desk",
     "offline-merchant",
