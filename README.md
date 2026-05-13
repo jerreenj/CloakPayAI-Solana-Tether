@@ -1,9 +1,9 @@
 <div align="center">
   <br />
   <h1>CloakPay AI</h1>
-  <p><strong>Your private business operating system on Solana.</strong></p>
+  <p><strong>A private QVAC business operating system for Solana payments.</strong></p>
   <p>
-    One app, four local tools, zero cloud by default. QVAC/local analysis keeps deal, merchant, wallet, and payroll context on-device before anything is signed or settled.
+    One app, four local tools, zero cloud by default. QVAC/local analysis keeps legal, merchant, wallet, and payroll context on-device before anything is signed or settled on Solana.
   </p>
   <p>
     <a href="https://cloakpay-ai.vercel.app"><strong>Live App</strong></a>
@@ -16,8 +16,9 @@
   </p>
   <p>
     <img alt="QVAC" src="https://img.shields.io/badge/QVAC-Local_AI-E1E0CC?style=flat-square&labelColor=111111" />
-    <img alt="Solana" src="https://img.shields.io/badge/Solana-Mainnet_Ready-14F195?style=flat-square&labelColor=111111" />
-    <img alt="USDT" src="https://img.shields.io/badge/USDT-SPL_Transfer-26A17B?style=flat-square&labelColor=111111" />
+    <img alt="Solana" src="https://img.shields.io/badge/Solana-Mainnet_Beta-14F195?style=flat-square&labelColor=111111" />
+    <img alt="USDT" src="https://img.shields.io/badge/Tether-USDT_SPL-26A17B?style=flat-square&labelColor=111111" />
+    <img alt="Payroll" src="https://img.shields.io/badge/Payroll-Batch_Transfers-FF9438?style=flat-square&labelColor=111111" />
     <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&labelColor=111111" />
     <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&labelColor=111111" />
   </p>
@@ -26,9 +27,9 @@
 
 ---
 
-CloakPay AI is a private business OS for Solana operators. It gives a founder, merchant, contractor, or small team one local desk for agreements, receipts, wallet checks, and payroll review. QVAC/local analysis handles the sensitive business context before a wallet signs. Solana receives only the final proof or payment transaction.
+CloakPay AI is a private QVAC business OS for Solana operators. It gives a founder, merchant, contractor, or small team one local desk for agreements, receipts, wallet checks, and payroll review. QVAC/local analysis handles the sensitive business context before a wallet signs. Solana receives only the final approved payment transaction.
 
-The app keeps the name CloakPay AI, but the product story is now broader than a payment firewall: it is the private operating layer before business actions settle on Solana.
+The product story is simple: private AI checks the business context locally, then the wallet signs the final Solana action.
 
 ## The Four Pillars
 
@@ -52,12 +53,20 @@ When a workflow is denominated in USDT, CloakPay prepares the Solana SPL token t
 ## What Is Real
 
 - Live app: https://cloakpay-ai.vercel.app.
-- Connected API paths: `/api/healthz`, `/api/qvac/status`, `/api/qvac/analyze-payment`, `/api/solana/prepare`, `/api/privacy/receipt`.
+- Connected API paths: `/api/healthz`, `/api/qvac/status`, `/api/qvac/analyze-payment`, `/api/solana/prepare`, `/api/solana/prepare-batch`, `/api/privacy/receipt`.
 - Real Solana transaction preparation for SOL, USDT SPL transfers, and same-token payroll batches.
 - Mainnet-beta path is available only after explicit real-funds confirmation.
 - Wallet signing stays wallet-side.
 - Offline Merchant stores queued payment intents locally and syncs them into the wallet signing flow when online.
 - Local account, history, feedback, monitor events, and privacy receipts live in browser storage and can be exported as JSON.
+
+## Submission Proof
+
+- **QVAC/local AI depth:** every workflow starts with local analysis before wallet action.
+- **Tether relevance:** USDT SPL transfer preparation supports the real mainnet Tether mint.
+- **Solana execution:** wallets receive serialized SOL, USDT, or payroll batch transactions to sign.
+- **Privacy:** documents, receipts, wallet notes, and payroll rows stay in local browser storage unless exported.
+- **Demo readiness:** the live Vercel app exposes the same API paths used by the local build.
 
 ## Product Truth
 
