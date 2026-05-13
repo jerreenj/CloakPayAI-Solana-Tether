@@ -19,7 +19,7 @@
 
 ## What To Say
 
-CloakPay AI is a QVAC-powered private business operating system for Solana teams. It handles the sensitive business steps locally: before you deal, when you agree, when you sell, and when you pay people. Solana only receives the final proof or payment.
+CloakPay AI is a QVAC-powered private business operating system for Solana teams. It handles the sensitive business steps locally: before you deal, when you agree, when you sell, and when you pay people. Solana only receives the final approved payment transaction.
 
 ## Product Truth
 
@@ -34,8 +34,8 @@ CloakPay AI is a QVAC-powered private business operating system for Solana teams
 
 ## Final Checks Before Submit
 
-- `npm run typecheck`
-- `npm run build`
+- `pnpm run typecheck`
+- `pnpm run build`
 - Open https://cloakpay-ai.vercel.app
 - Confirm the GitHub repo description matches the new business OS framing
 - Confirm the README includes the live preview and new four-pillar story

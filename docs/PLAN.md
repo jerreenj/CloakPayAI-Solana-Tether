@@ -32,4 +32,4 @@ CloakPay AI is a private QVAC business operating system for Solana teams. The ap
 
 ## Demo Story
 
-Start with: "CloakPay AI is your private business operating system on Solana. Before you deal, agree, sell, or pay people, local AI checks the context privately. Solana only receives the final proof or payment."
+Start with: "CloakPay AI is your private QVAC business operating system on Solana. Before you deal, agree, sell, or pay people, local AI checks the context privately. Solana only receives the final approved transaction."
